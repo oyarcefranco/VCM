@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard VcM — Encuestas Estudiantes 2021-2025</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <style>
     * {
       margin: 0;
@@ -364,15 +365,15 @@
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi2">95,0%</div>
-        <div class="label">Índice de Recomendación<br>Global</div>
+        <div class="label">Índice de Recomendación <span title="Pregunta: ¿Recomendarías a tus compañeros participar en un Proyecto Colaborativo VcM?" style="cursor:help">ℹ️</span><br>Global</div>
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi3">86,7%</div>
-        <div class="label">Impacto Positivo en<br>Formación (T2B)</div>
+        <div class="label">Impacto Positivo en <span title="Promedio de estudiantes que calificaron la experiencia como Significativa o Muy Significativa (T2B)" style="cursor:help">ℹ️</span><br>Formación (T2B)</div>
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi4">76,1%</div>
-        <div class="label">Expectativas Cumplidas<br>(T2B)</div>
+        <div class="label">Expectativas Cumplidas <span title="Promedio de estudiantes que indicaron que se cumplieron en alto grado sus expectativas (T2B)" style="cursor:help">ℹ️</span><br>(T2B)</div>
       </div>
     </div>
     <!-- Navigation -->
@@ -386,8 +387,7 @@
     <!-- Sections -->
     <div id="sec-imp" class="section">
       <div class="section-title">Importancia de Aspectos Formativos</div>
-      <div class="section-sub">Pregunta: "¿Cuán importante es para ti participar en Proyectos VcM porque te
-        permiten...?" · Escala Likert 1-5 · Métrica: % Top-2 Box (Importante + Muy Importante)</div>
+      <div class="section-sub">Pregunta: "Evalúa el grado de importancia que tuvo participar en el Proyecto Colaborativo para el logro de los siguientes aspectos:" · Métrica: % Top-2 Box (Importante + Muy Importante)</div>
       <div class="year-filter" id="yf-imp"></div>
       <div class="item-controls" id="ctrl-imp"></div>
       <div class="item-chips" id="chips-imp"></div>
@@ -395,9 +395,8 @@
       <div class="chart-wrap"><canvas id="chart-imp"></canvas></div>
     </div>
     <div id="sec-hab" class="section hidden">
-      <div class="section-title">Habilidades Transversales Fortalecidas</div>
-      <div class="section-sub">Pregunta: "¿En qué grado se fortalecieron las siguientes habilidades?" · Escala Likert
-        1-5 · Métrica: % Top-2 Box (Se fortalece + Muy fortalecida)</div>
+      <div class="section-title">Desarrollo Habilidades</div>
+      <div class="section-sub">Pregunta: "¿En qué grado se fortalecieron las siguientes habilidades?" · Métrica: % Top-2 Box (Se fortalece + Muy fortalecida)</div>
       <div class="year-filter" id="yf-hab"></div>
       <div class="item-controls" id="ctrl-hab"></div>
       <div class="item-chips" id="chips-hab"></div>
@@ -418,6 +417,7 @@
       <div class="year-filter" id="yf-val"></div>
       <div class="item-controls" id="ctrl-val"></div>
       <div class="item-chips" id="chips-val"></div>
+      <div id="avail-val" class="avail-note"></div>
       <div class="chart-wrap"><canvas id="chart-val"></canvas></div>
     </div>
     <div id="sec-trend" class="section hidden">
@@ -433,8 +433,9 @@
   </div>
   <script>
     const COLORS = ['#1e4c9a', '#7d4199', '#009a74', '#f37021', '#f3a81a', '#4c3c5c', '#2a82c9', '#e64d3d', '#8c7a6b', '#5c9d38'];
-    const YEAR_COLORS = { 2021: '#1e4c9a', 2022: '#7d4199', 2023: '#009a74', 2024: '#f37021', 2025: '#f3a81a' };
+    const YEAR_COLORS = { 2021: '#8e44ad', 2022: '#f39c12', 2023: '#e84393', 2024: '#2980b9', 2025: '#16a085' };
     let charts = {};
+    Chart.register(ChartDataLabels);
     let DATA;
     let sectionState = {};
 
@@ -444,7 +445,7 @@
       buildSection('imp', DATA.importancia, 'Indicador', 'Top_2_Box (%)');
       buildSection('hab', DATA.habilidades, 'Indicador', 'Top_2_Box (%)');
       buildIndicadores();
-      buildValoresSection();
+      buildSection('val', DATA.valores, 'Valor Sebastiano', '% de Estudiantes');
       buildTrends();
     }
 
@@ -567,6 +568,9 @@
       const canvas = document.getElementById('chart-' + key);
       const availEl = document.getElementById('avail-' + key);
 
+      const isSingleItem = st.activeItems.size === 1;
+      const indexAxis = isSingleItem ? 'x' : 'y';
+
       if (selectedYear !== null) {
         // SINGLE YEAR
         let filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
@@ -583,25 +587,33 @@
           availEl.style.display = 'inline-block';
         } else { availEl.style.display = 'none'; }
 
-        setChartHeight(canvas, Math.max(labels.length * 44, 180));
+        if (isSingleItem) setChartHeight(canvas, 400);
+        else setChartHeight(canvas, Math.max(labels.length * 35, 180));
+        
         charts[key] = new Chart(canvas, {
           type: 'bar',
           data: {
             labels, datasets: [{
               data: values,
-              backgroundColor: values.map(v => v >= 90 ? '#009a74' : v >= 80 ? '#1e4c9a' : v >= 70 ? '#f3a81a' : '#e64d3d'),
-              borderRadius: 4, borderSkipped: false, barThickness: 22
+              backgroundColor: YEAR_COLORS[selectedYear],
+              borderRadius: 4, borderSkipped: false, barThickness: 18
             }]
           },
           options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
+              title: { display: true, text: 'Top-2 Box: ' + selectedYear, font: { size: 14 } },
+              datalabels: {
+                color: '#fff',
+                font: { weight: 'bold', size: 11 },
+                formatter: (value) => value.toFixed(1) + '%'
+              },
               tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } }
             },
             scales: {
-              x: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
-              y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
             }
           }
         });
@@ -622,22 +634,31 @@
             const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
             return m ? (m[valueField] * 100) : null;
           }),
-          backgroundColor: YEAR_COLORS[y] + 'cc',
-          borderRadius: 3, borderSkipped: false, barThickness: 14
+          backgroundColor: YEAR_COLORS[y],
+          borderRadius: 3, borderSkipped: false, barThickness: 12
         }));
-        setChartHeight(canvas, Math.max(items.length * 80, 300));
+        
+        if (isSingleItem) setChartHeight(canvas, 400);
+        else setChartHeight(canvas, Math.max(items.length * 65, 300));
+        
         charts[key] = new Chart(canvas, {
           type: 'bar',
           data: { labels: items, datasets },
           options: {
-            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } },
+              title: { display: true, text: 'Top-2 Box: Todos los años', font: { size: 14 } },
+              datalabels: {
+                color: '#fff',
+                font: { weight: 'bold', size: 10 },
+                formatter: (value) => value ? value.toFixed(1) + '%' : ''
+              },
               tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.raw ? c.raw.toFixed(1) + '%' : 'Sin dato') } }
             },
             scales: {
-              x: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
-              y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
             }
           }
         });
@@ -687,124 +708,7 @@
       });
     }
 
-    /* ═══════ VALORES SEBASTIANOS (with toggles) ═══════ */
-    function buildValoresSection() {
-      const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
-      sectionState['val'] = { selectedYear: 2025, activeItems: new Set(), sortBy: 'value' };
-      const container = document.getElementById('yf-val');
-      years.forEach(y => {
-        const b = document.createElement('button');
-        b.className = 'year-btn' + (y === 2025 ? ' active' : ''); b.textContent = y;
-        b.onclick = () => {
-          document.querySelectorAll('#yf-val .year-btn').forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          sectionState['val'].selectedYear = y;
-          refreshValores();
-        };
-        container.appendChild(b);
-      });
 
-      const ctrl = document.getElementById('ctrl-val');
-      ctrl.innerHTML = '<button onclick="toggleAllVal(true)">✓ Todos</button>'
-        + '<button onclick="toggleAllVal(false)">✕ Ninguno</button>'
-        + '<button class="sort-btn active" id="sort-val" onclick="toggleSortVal()">↕ Ordenar por valor</button>'
-        + '<span class="item-count" id="count-val"></span>';
-
-      refreshValores();
-    }
-
-    function toggleSortVal() {
-      const st = sectionState['val'];
-      st.sortBy = st.sortBy === 'value' ? 'default' : 'value';
-      const btn = document.getElementById('sort-val');
-      btn.classList.toggle('active', st.sortBy === 'value');
-      btn.textContent = st.sortBy === 'value' ? '↕ Orden original' : '↕ Ordenar por valor';
-      redrawValores();
-    }
-
-    function refreshValores() {
-      const st = sectionState['val'];
-      const year = st.selectedYear;
-      const items = DATA.valores.filter(r => r['Año'] === year).map(r => r['Valor Sebastiano']);
-      st.activeItems = new Set(items);
-      buildValChips();
-      redrawValores();
-    }
-
-    function buildValChips() {
-      const st = sectionState['val'];
-      const year = st.selectedYear;
-      // Chips are always sorted by value for easier finding
-      const items = DATA.valores.filter(r => r['Año'] === year).sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']).map(r => r['Valor Sebastiano']);
-      const container = document.getElementById('chips-val');
-      container.innerHTML = '';
-      items.forEach(item => {
-        const chip = document.createElement('span');
-        chip.className = 'item-chip' + (st.activeItems.has(item) ? '' : ' off');
-        chip.textContent = item;
-        chip.onclick = () => {
-          if (st.activeItems.has(item)) st.activeItems.delete(item);
-          else st.activeItems.add(item);
-          chip.classList.toggle('off');
-          updateValCount();
-          redrawValores();
-        };
-        container.appendChild(chip);
-      });
-      updateValCount();
-    }
-
-    function updateValCount() {
-      const st = sectionState['val'];
-      const total = DATA.valores.filter(r => r['Año'] === st.selectedYear).length;
-      document.getElementById('count-val').textContent = st.activeItems.size + ' de ' + total + ' seleccionados';
-    }
-
-    function toggleAllVal(on) {
-      const st = sectionState['val'];
-      const items = DATA.valores.filter(r => r['Año'] === st.selectedYear).map(r => r['Valor Sebastiano']);
-      if (on) items.forEach(i => st.activeItems.add(i)); else st.activeItems.clear();
-      document.querySelectorAll('#chips-val .item-chip').forEach(c => {
-        if (on) c.classList.remove('off'); else c.classList.add('off');
-      });
-      updateValCount();
-      redrawValores();
-    }
-
-    function redrawValores() {
-      const st = sectionState['val'];
-      const year = st.selectedYear;
-      let filtered = DATA.valores.filter(r => r['Año'] === year && st.activeItems.has(r['Valor Sebastiano']));
-
-      if (st.sortBy === 'value') {
-        filtered.sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']);
-      } else {
-        // Default order: alphabetically for values if not sorting by value, or keeping original order if it had one
-        filtered.sort((a, b) => a['Valor Sebastiano'].localeCompare(b['Valor Sebastiano']));
-      }
-      if (charts.val) charts.val.destroy();
-      const canvas = document.getElementById('chart-val');
-      setChartHeight(canvas, Math.max(filtered.length * 48, 180));
-      charts.val = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: filtered.map(r => r['Valor Sebastiano']),
-          datasets: [{
-            data: filtered.map(r => r['% de Estudiantes'] * 100),
-            backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
-            borderRadius: 6, borderSkipped: false, barThickness: 24
-          }]
-        },
-        options: {
-          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } } },
-          scales: {
-            x: { min: 0, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v.toFixed(0) + '%' } },
-            y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
-          }
-        }
-      });
-    }
 
     /* ═══════ TRENDS (unchanged) ═══════ */
     function buildTrends() {
