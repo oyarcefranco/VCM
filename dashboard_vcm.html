@@ -129,8 +129,8 @@
     .section {
       background: #fff;
       border-radius: 4px;
-      padding: 30px;
-      margin-bottom: 24px;
+      padding: 40px;
+      margin-bottom: 40px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
@@ -182,7 +182,8 @@
     .chart-wrap {
       position: relative;
       width: 100%;
-      margin-bottom: 15px;
+      max-width: 1000px;
+      margin: 0 auto 15px auto;
       overflow: visible
     }
 
@@ -406,7 +407,9 @@
     <div id="sec-ind" class="section hidden">
       <div class="section-title">Indicadores Clave por Año</div>
       <div class="section-sub">Métricas generales: Significancia, Expectativas, Recomendación, Campo Laboral y
-        Vinculación con el Medio</div>
+        Vinculación con el Medio.<br>
+        <strong>Significancia:</strong> Nivel de impacto en formación. <strong>Expectativas:</strong> Cumplimiento de las expectativas iniciales. <strong>Recomendación:</strong> Intención de sugerir la experiencia.
+      </div>
       <div class="year-filter" id="yf-ind"></div>
       <div class="chart-wrap"><canvas id="chart-ind"></canvas></div>
     </div>
@@ -603,17 +606,21 @@
             indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              title: { display: true, text: 'Top-2 Box: ' + selectedYear, font: { size: 14 } },
+              title: { display: true, text: 'Top-2 Box: ' + selectedYear, font: { size: 16 } },
               datalabels: {
                 color: '#fff',
-                font: { weight: 'bold', size: 11 },
-                formatter: (value) => value.toFixed(1) + '%'
+                font: { weight: 'bold', size: 12 },
+                formatter: (value) => (value.toFixed(2) + '%').replace('.', ',')
               },
-              tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } }
+              tooltip: { 
+                  titleFont: { size: 14 },
+                  bodyFont: { size: 14 },
+                  callbacks: { label: c => (c.raw.toFixed(2) + '%').replace('.', ',') } 
+              }
             },
             scales: {
-              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
-              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 13 } } }
             }
           }
         });
@@ -647,18 +654,22 @@
           options: {
             indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } },
-              title: { display: true, text: 'Top-2 Box: Todos los años', font: { size: 14 } },
+              legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 13 } } },
+              title: { display: true, text: 'Top-2 Box: Todos los años', font: { size: 16 } },
               datalabels: {
                 color: '#fff',
-                font: { weight: 'bold', size: 10 },
-                formatter: (value) => value ? value.toFixed(1) + '%' : ''
+                font: { weight: 'bold', size: 11 },
+                formatter: (value) => value ? (value.toFixed(2) + '%').replace('.', ',') : ''
               },
-              tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.raw ? c.raw.toFixed(1) + '%' : 'Sin dato') } }
+              tooltip: { 
+                  titleFont: { size: 14 },
+                  bodyFont: { size: 14 },
+                  callbacks: { label: c => c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') } 
+              }
             },
             scales: {
-              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
-              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 13 } } }
             }
           }
         });
@@ -667,45 +678,8 @@
 
     /* ═══════ INDICADORES (unchanged logic) ═══════ */
     function buildIndicadores() {
-      const years = [...new Set(DATA.indicadores.map(r => r['Año']))].sort();
-      const container = document.getElementById('yf-ind');
-      years.forEach(y => {
-        const b = document.createElement('button');
-        b.className = 'year-btn' + (y === 2025 ? ' active' : ''); b.textContent = y;
-        b.onclick = () => {
-          document.querySelectorAll('#yf-ind .year-btn').forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          renderIndicadores(y);
-        };
-        container.appendChild(b);
-      });
-      renderIndicadores(2025);
-    }
-
-    function renderIndicadores(year) {
-      const filtered = DATA.indicadores.filter(r => r['Año'] === year);
-      if (charts.ind) charts.ind.destroy();
-      const canvas = document.getElementById('chart-ind');
-      setChartHeight(canvas, Math.max(filtered.length * 50, 200));
-      charts.ind = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: filtered.map(r => r['Indicador']),
-          datasets: [{
-            data: filtered.map(r => r['Resultado (%)'] * 100),
-            backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
-            borderRadius: 6, borderSkipped: false
-          }]
-        },
-        options: {
-          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } } },
-          scales: {
-            x: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
-            y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
-          }
-        }
-      });
+      // Re-use buildSection for Indicadores to allow "Todos los años" and standard filtering
+      buildSection('ind', DATA.indicadores, 'Indicador', 'Resultado (%)');
     }
 
 
@@ -721,7 +695,7 @@
       }));
       charts.trend1 = new Chart(document.getElementById('chart-trend1'), {
         type: 'line', data: { labels: years, datasets: ds1 },
-        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Top 4 Habilidades (T2B %)', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 70, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Top 4 Habilidades (T2B %)', color: '#333333', font: { size: 16 } }, legend: { labels: { color: '#666666', font: { size: 12 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 } } }, y: { min: 70, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } } } }
       });
       const topImp = ['Conocer la realidad (problemas/desafíos)', 'Aplicar lo aprendido en clases', 'Fortalecer vocación profesional', 'Fortalecer valores sebastianos'];
       const ds2 = topImp.map((h, i) => ({
@@ -731,7 +705,7 @@
       }));
       charts.trend2 = new Chart(document.getElementById('chart-trend2'), {
         type: 'line', data: { labels: years, datasets: ds2 },
-        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Top 4 Aspectos Formativos (T2B %)', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Top 4 Aspectos Formativos (T2B %)', color: '#333333', font: { size: 16 } }, legend: { labels: { color: '#666666', font: { size: 12 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 } } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } } } }
       });
       const indNames = ['Significancia en Formación (T2B)', 'Expectativas Cumplidas (T2B)', 'Recomendaría a compañeros (% Sí)'];
       const ds3 = indNames.map((h, i) => ({
@@ -741,12 +715,12 @@
       }));
       charts.trend3 = new Chart(document.getElementById('chart-trend3'), {
         type: 'line', data: { labels: years, datasets: ds3 },
-        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Indicadores Principales', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Indicadores Principales', color: '#333333', font: { size: 16 } }, legend: { labels: { color: '#666666', font: { size: 12 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 } } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } } } }
       });
       const partData = [{ y: 2021, n: 911 }, { y: 2022, n: 2422 }, { y: 2023, n: 1953 }, { y: 2024, n: 3970 }, { y: 2025, n: 4629 }];
       charts.trend4 = new Chart(document.getElementById('chart-trend4'), {
-        type: 'bar', data: { labels: years, datasets: [{ label: 'Estudiantes encuestados', data: partData.map(d => d.n), backgroundColor: years.map(y => YEAR_COLORS[y] + 'cc'), borderRadius: 8 }] },
-        options: { responsive: true, plugins: { title: { display: true, text: 'Participación por Año', color: '#333333', font: { size: 14 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } } } }
+        type: 'bar', data: { labels: years, datasets: [{ label: 'Estudiantes encuestados', data: partData.map(d => d.n), backgroundColor: years.map(y => YEAR_COLORS[y]), borderRadius: 8 }] },
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Participación por Año', color: '#333333', font: { size: 16 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 } } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 } } } } }
       });
     }
   </script>
