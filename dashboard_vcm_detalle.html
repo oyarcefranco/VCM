@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard VcM — Encuestas Estudiantes 2021-2025</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap');
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #f4f5f7;
+      color: #333;
+      min-height: 100vh
+    }
+
+    .header-top {
+      background: #fff;
+      border-bottom: 2px solid #eaeaea;
+      padding: 15px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-top h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1b365d;
+    }
+
+    .header-top .logo {
+      font-weight: 700;
+      color: #1b365d;
+    }
+
+    .header-nav {
+      background: #1b365d;
+      color: #fff;
+      padding: 10px 40px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-nav .subtitle {
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 30px 20px
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px
+    }
+
+    .kpi-card {
+      border-radius: 4px;
+      padding: 30px 20px;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .kpi-card:nth-child(1) {
+      background: #1e4c9a;
+    }
+
+    /* Blue */
+    .kpi-card:nth-child(2) {
+      background: #7d4199;
+    }
+
+    /* Purple */
+    .kpi-card:nth-child(3) {
+      background: #009a74;
+    }
+
+    /* Green/Teal */
+    .kpi-card:nth-child(4) {
+      background: #f37021;
+    }
+
+    /* Orange */
+    .kpi-card .value {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .kpi-card .label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: 4px;
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1b365d;
+      border-bottom: 2px solid #eaeaea;
+      padding-bottom: 10px;
+    }
+
+    .section-sub {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .year-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap
+    }
+
+    .year-btn {
+      padding: 8px 20px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #555;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all .2s
+    }
+
+    .year-btn.active {
+      background: #1b365d;
+      color: #fff;
+      border-color: #1b365d;
+    }
+
+    .year-btn:hover:not(.active) {
+      background: #f0f0f0;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      margin-bottom: 15px;
+      overflow: visible
+    }
+
+    .avail-note {
+      font-size: 12px;
+      color: #555;
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: #f9f9f9;
+      border-left: 4px solid #1b365d;
+      display: inline-block
+    }
+
+    .avail-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px
+    }
+
+    .avail-dot.yes {
+      background: #009a74
+    }
+
+    .avail-dot.no {
+      background: #ccc
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 15px;
+    }
+
+    .nav-btn {
+      padding: 12px 24px;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      color: #555;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      transition: all .2s;
+      text-transform: uppercase;
+    }
+
+    .nav-btn.active {
+      background: #1b365d;
+      color: #fff;
+    }
+
+    .nav-btn:hover:not(.active) {
+      background: #e2e6eb;
+      color: #1b365d;
+    }
+
+    .hidden {
+      display: none
+    }
+
+    .trend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px
+    }
+
+    @media(max-width:900px) {
+      .kpi-row {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .trend-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media(max-width:600px) {
+      .kpi-row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .item-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap
+    }
+
+    .item-controls button {
+      padding: 5px 14px;
+      border-radius: 4px;
+      border: 1px solid #1b365d;
+      background: #fff;
+      color: #1b365d;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all .15s
+    }
+
+    .item-controls button:hover {
+      background: #1b365d;
+      color: #fff
+    }
+
+    .item-controls .sort-btn.active {
+      background: #1b365d;
+      color: #fff
+    }
+
+    .item-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 4px 0
+    }
+
+    .item-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid #1b365d;
+      background: #e8edf4;
+      color: #1b365d;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all .15s;
+      user-select: none;
+      white-space: nowrap
+    }
+
+    .item-chip.off {
+      background: #f4f4f4;
+      color: #bbb;
+      border-color: #ddd;
+      text-decoration: line-through
+    }
+
+    .item-chip:hover {
+      opacity: .8
+    }
+
+    .item-count {
+      font-size: 12px;
+      color: #888;
+      font-weight: 400;
+      margin-left: 6px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header-top">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <h1>Universidad San Sebastián</h1>
+      <a href="dashboard_vcm.html" style="background: #1b365d; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">⬅ Volver al Resumen</a>
+    </div>
+    <div class="logo">Dashboard VcM</div>
+  </div>
+  <div class="header-nav">
+    <div class="subtitle">Proyectos Colaborativos de Vinculación con el Medio</div>
+    <div>2021 — 2025</div>
+  </div>
+  <div class="container">
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="value" id="kpi1">13.885</div>
+        <div class="label">Estudiantes Impactados<br>(2021-2025)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="value" id="kpi2">95,0%</div>
+        <div class="label">Índice de Recomendación<br>Global</div>
+      </div>
+      <div class="kpi-card">
+        <div class="value" id="kpi3">86,7%</div>
+        <div class="label">Impacto Positivo en<br>Formación (T2B)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="value" id="kpi4">76,1%</div>
+        <div class="label">Expectativas Cumplidas<br>(T2B)</div>
+      </div>
+    </div>
+    <!-- Navigation -->
+    <div class="nav">
+      <button class="nav-btn active" onclick="showSection('imp')">Importancia Aspectos</button>
+      <button class="nav-btn" onclick="showSection('hab')">Habilidades</button>
+      <button class="nav-btn" onclick="showSection('ind')">Indicadores Clave</button>
+      <button class="nav-btn" onclick="showSection('val')">Valores Sebastianos</button>
+      <button class="nav-btn" onclick="showSection('trend')">Evolución Temporal</button>
+    </div>
+    <!-- Sections -->
+    <div id="sec-imp" class="section">
+      <div class="section-title">Importancia de Aspectos Formativos</div>
+      <div class="section-sub">Pregunta: "¿Cuán importante es para ti participar en Proyectos VcM porque te
+        permiten...?" · Escala Likert 1-5 · Métrica: % Top-2 Box (Importante + Muy Importante)</div>
+      <div class="year-filter" id="yf-imp"></div>
+      <div class="item-controls" id="ctrl-imp"></div>
+      <div class="item-chips" id="chips-imp"></div>
+      <div id="avail-imp" class="avail-note"></div>
+      <div class="chart-wrap"><canvas id="chart-imp"></canvas></div>
+    </div>
+    <div id="sec-hab" class="section hidden">
+      <div class="section-title">Habilidades Transversales Fortalecidas</div>
+      <div class="section-sub">Pregunta: "¿En qué grado se fortalecieron las siguientes habilidades?" · Escala Likert
+        1-5 · Métrica: % Top-2 Box (Se fortalece + Muy fortalecida)</div>
+      <div class="year-filter" id="yf-hab"></div>
+      <div class="item-controls" id="ctrl-hab"></div>
+      <div class="item-chips" id="chips-hab"></div>
+      <div id="avail-hab" class="avail-note"></div>
+      <div class="chart-wrap"><canvas id="chart-hab"></canvas></div>
+    </div>
+    <div id="sec-ind" class="section hidden">
+      <div class="section-title">Indicadores Clave por Año</div>
+      <div class="section-sub">Métricas generales: Significancia, Expectativas, Recomendación, Campo Laboral y
+        Vinculación con el Medio</div>
+      <div class="year-filter" id="yf-ind"></div>
+      <div class="chart-wrap"><canvas id="chart-ind"></canvas></div>
+    </div>
+    <div id="sec-val" class="section hidden">
+      <div class="section-title">Valores Sebastianos — Ranking de Menciones</div>
+      <div class="section-sub">Pregunta: "Identifica qué Valores Sebastianos estuvieron presentes en el proyecto" ·
+        Selección múltiple · Métrica: % de estudiantes que lo marcó</div>
+      <div class="year-filter" id="yf-val"></div>
+      <div class="item-controls" id="ctrl-val"></div>
+      <div class="item-chips" id="chips-val"></div>
+      <div class="chart-wrap"><canvas id="chart-val"></canvas></div>
+    </div>
+    <div id="sec-trend" class="section hidden">
+      <div class="section-title">Evolución Temporal (2021-2025)</div>
+      <div class="section-sub">Tendencia de los principales indicadores a lo largo de los 5 años</div>
+      <div class="trend-grid">
+        <div class="chart-wrap"><canvas id="chart-trend1"></canvas></div>
+        <div class="chart-wrap"><canvas id="chart-trend2"></canvas></div>
+        <div class="chart-wrap"><canvas id="chart-trend3"></canvas></div>
+        <div class="chart-wrap"><canvas id="chart-trend4"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const COLORS = ['#1e4c9a', '#7d4199', '#009a74', '#f37021', '#f3a81a', '#4c3c5c', '#2a82c9', '#e64d3d', '#8c7a6b', '#5c9d38'];
+    const YEAR_COLORS = { 2021: '#1e4c9a', 2022: '#7d4199', 2023: '#009a74', 2024: '#f37021', 2025: '#f3a81a' };
+    let charts = {};
+    let DATA;
+    let sectionState = {};
+
+    DATA={"kpis": [{"Métrica": "Total Estudiantes Impactados (2021-2025)", "Valor": 13885}, {"Métrica": "Índice de Recomendación Global", "Valor": "95.0%"}, {"Métrica": "Impacto Positivo en Formación (T2B Global)", "Valor": "86.7%"}, {"Métrica": "Expectativas Cumplidas (T2B Global)", "Valor": "76.1%"}], "importancia": [{"Año": 2021, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 906, "Top_2_Box (%)": 0.8995584988962473, "Promedio (1-5)": 4.52317880794702, "% 1": 0.0033112582781456954, "% 2": 0.01434878587196468, "% 3": 0.08278145695364239, "% 4": 0.25496688741721857, "% 5": 0.6445916114790287}, {"Año": 2022, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9042113955408753, "Promedio (1-5)": 4.494632535094963, "% 1": 0.005780346820809248, "% 2": 0.01486374896779521, "% 3": 0.07514450867052024, "% 4": 0.28736581337737405, "% 5": 0.6168455821635013}, {"Año": 2023, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 1944, "Top_2_Box (%)": 0.9372427983539094, "Promedio (1-5)": 4.633744855967078, "% 1": 0.00205761316872428, "% 2": 0.0102880658436214, "% 3": 0.050411522633744855, "% 4": 0.22633744855967078, "% 5": 0.7109053497942387}, {"Año": 2024, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 3670, "Top_2_Box (%)": 0.8681198910081744, "Promedio (1-5)": 4.370299727520436, "% 1": 0.01662125340599455, "% 2": 0.023978201634877384, "% 3": 0.09128065395095368, "% 4": 0.30871934604904633, "% 5": 0.559400544959128}, {"Año": 2025, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 4386, "Top_2_Box (%)": 0.8974008207934336, "Promedio (1-5)": 4.511627906976744, "% 1": 0.014135886912904697, "% 2": 0.021431828545371637, "% 3": 0.06703146374829001, "% 4": 0.23347013223894209, "% 5": 0.6639306885544916}, {"Año": 2021, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 897, "Top_2_Box (%)": 0.8974358974358975, "Promedio (1-5)": 4.51505016722408, "% 1": 0.0033444816053511705, "% 2": 0.01560758082497213, "% 3": 0.08361204013377926, "% 4": 0.25752508361204013, "% 5": 0.6399108138238573}, {"Año": 2022, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9042113955408753, "Promedio (1-5)": 4.511147811725847, "% 1": 0.009083402146985962, "% 2": 0.01486374896779521, "% 3": 0.07184145334434351, "% 4": 0.26424442609413706, "% 5": 0.6399669694467383}, {"Año": 2023, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 1929, "Top_2_Box (%)": 0.9455676516329704, "Promedio (1-5)": 4.683773976153447, "% 1": 0.00414722654224987, "% 2": 0.006220839813374806, "% 3": 0.04406428201140487, "% 4": 0.19284603421461896, "% 5": 0.7527216174183515}, {"Año": 2024, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 3676, "Top_2_Box (%)": 0.9004352557127312, "Promedio (1-5)": 4.493199129488574, "% 1": 0.014961915125136017, "% 2": 0.013601741022850925, "% 3": 0.07100108813928183, "% 4": 0.26414581066376497, "% 5": 0.6362894450489662}, {"Año": 2025, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 4382, "Top_2_Box (%)": 0.9148790506617983, "Promedio (1-5)": 4.608854404381561, "% 1": 0.012323140118667275, "% 2": 0.016430853491556367, "% 3": 0.05636695572797809, "% 4": 0.1798265632131447, "% 5": 0.7350524874486536}, {"Año": 2022, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8905862923203963, "Promedio (1-5)": 4.499587118084228, "% 1": 0.008257638315441783, "% 2": 0.012386457473162676, "% 3": 0.08876961189099918, "% 4": 0.2526837324525186, "% 5": 0.6379025598678778}, {"Año": 2023, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 1923, "Top_2_Box (%)": 0.9339573582943318, "Promedio (1-5)": 4.656786271450858, "% 1": 0.004160166406656267, "% 2": 0.010400416016640665, "% 3": 0.0514820592823713, "% 4": 0.19240769630785232, "% 5": 0.7415496619864794}, {"Año": 2024, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 3666, "Top_2_Box (%)": 0.8881614839061648, "Promedio (1-5)": 4.480087288597927, "% 1": 0.01773049645390071, "% 2": 0.01800327332242226, "% 3": 0.07610474631751228, "% 4": 0.24277141298417895, "% 5": 0.6453900709219859}, {"Año": 2025, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 4381, "Top_2_Box (%)": 0.9018488929468158, "Promedio (1-5)": 4.557635243095183, "% 1": 0.017119379137183293, "% 2": 0.02122803013010728, "% 3": 0.05980369778589363, "% 4": 0.19059575439397397, "% 5": 0.7112531385528418}, {"Año": 2021, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 901, "Top_2_Box (%)": 0.7691453940066593, "Promedio (1-5)": 4.1331853496115425, "% 1": 0.0244173140954495, "% 2": 0.03662597114317425, "% 3": 0.16981132075471697, "% 4": 0.3196448390677026, "% 5": 0.44950055493895674}, {"Año": 2022, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 2350, "Top_2_Box (%)": 0.7195744680851064, "Promedio (1-5)": 3.9906382978723403, "% 1": 0.05106382978723404, "% 2": 0.07191489361702127, "% 3": 0.1574468085106383, "% 4": 0.274468085106383, "% 5": 0.4451063829787234}, {"Año": 2023, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 1909, "Top_2_Box (%)": 0.8009429020429544, "Promedio (1-5)": 4.270822420115244, "% 1": 0.027239392352016764, "% 2": 0.04871660555264536, "% 3": 0.12310110005238345, "% 4": 0.2278679937139864, "% 5": 0.573074908328968}, {"Año": 2024, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 3650, "Top_2_Box (%)": 0.7602739726027398, "Promedio (1-5)": 4.086301369863014, "% 1": 0.05150684931506849, "% 2": 0.0526027397260274, "% 3": 0.13561643835616438, "% 4": 0.27863013698630135, "% 5": 0.48164383561643836}, {"Año": 2025, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 4367, "Top_2_Box (%)": 0.823219601557133, "Promedio (1-5)": 4.3182963132585295, "% 1": 0.042363178383329515, "% 2": 0.03205862147927639, "% 3": 0.10235859858026104, "% 4": 0.21135791160980077, "% 5": 0.6118616899473323}, {"Año": 2021, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 899, "Top_2_Box (%)": 0.9098998887652948, "Promedio (1-5)": 4.586206896551724, "% 1": 0.0033370411568409346, "% 2": 0.013348164627363738, "% 3": 0.07341490545050056, "% 4": 0.2135706340378198, "% 5": 0.696329254727475}, {"Año": 2022, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9946325350949629, "Promedio (1-5)": 4.031379025598679, "% 1": 0, "% 2": 0.0008257638315441783, "% 3": 0.004541701073492981, "% 4": 0.9570602807597027, "% 5": 0.03757225433526012}, {"Año": 2023, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 1937, "Top_2_Box (%)": 0.9514713474445018, "Promedio (1-5)": 4.699535363964894, "% 1": 0.0005162622612287042, "% 2": 0.010325245224574084, "% 3": 0.03768714506969541, "% 4": 0.19204956117707794, "% 5": 0.7594217862674238}, {"Año": 2021, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 902, "Top_2_Box (%)": 0.8946784922394678, "Promedio (1-5)": 4.529933481152994, "% 1": 0.004434589800443459, "% 2": 0.014412416851441241, "% 3": 0.08647450110864745, "% 4": 0.2361419068736142, "% 5": 0.6585365853658537}, {"Año": 2022, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 2377, "Top_2_Box (%)": 0.9015565839293227, "Promedio (1-5)": 4.517038283550694, "% 1": 0.00715187210769878, "% 2": 0.01093815734118637, "% 3": 0.08035338662179217, "% 4": 0.2608329827513673, "% 5": 0.6407236011779555}, {"Año": 2023, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 1920, "Top_2_Box (%)": 0.9395833333333333, "Promedio (1-5)": 4.668229166666666, "% 1": 0.0020833333333333333, "% 2": 0.007291666666666667, "% 3": 0.051041666666666666, "% 4": 0.19947916666666668, "% 5": 0.7401041666666667}, {"Año": 2021, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 898, "Top_2_Box (%)": 0.8930957683741648, "Promedio (1-5)": 4.522271714922049, "% 1": 0.0033407572383073497, "% 2": 0.014476614699331848, "% 3": 0.08908685968819599, "% 4": 0.24276169265033407, "% 5": 0.6503340757238307}, {"Año": 2022, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8971924029727498, "Promedio (1-5)": 4.47233691164327, "% 1": 0.010734929810074319, "% 2": 0.009083402146985962, "% 3": 0.08298926507018993, "% 4": 0.29149463253509494, "% 5": 0.6056977704376548}, {"Año": 2023, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 1913, "Top_2_Box (%)": 0.9393622582331417, "Promedio (1-5)": 4.653423941453215, "% 1": 0.0026136957658128594, "% 2": 0.00836382645060115, "% 3": 0.04966021955044433, "% 4": 0.21170935703084162, "% 5": 0.7276529012023001}, {"Año": 2024, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 3661, "Top_2_Box (%)": 0.875717017208413, "Promedio (1-5)": 4.4356733133023765, "% 1": 0.021305654192843484, "% 2": 0.019393608303742146, "% 3": 0.08358372029500137, "% 4": 0.2537558044250205, "% 5": 0.6219612127833926}, {"Año": 2024, "Código": "IMP_08", "Indicador": "Compromiso con la sociedad", "N_Respuestas": 3658, "Top_2_Box (%)": 0.8698742482230727, "Promedio (1-5)": 4.406232914160744, "% 1": 0.018316019682886823, "% 2": 0.01913613996719519, "% 3": 0.09267359212684527, "% 4": 0.277747402952433, "% 5": 0.5921268452706397}, {"Año": 2024, "Código": "IMP_09", "Indicador": "Ser ciudadano responsable", "N_Respuestas": 3651, "Top_2_Box (%)": 0.8619556285949055, "Promedio (1-5)": 4.372774582306217, "% 1": 0.01917282936181868, "% 2": 0.024650780608052588, "% 3": 0.09422076143522323, "% 4": 0.2881402355519036, "% 5": 0.5738153930430019}, {"Año": 2024, "Código": "IMP_10", "Indicador": "Incrementar redes de contactos", "N_Respuestas": 3647, "Top_2_Box (%)": 0.7781738415135728, "Promedio (1-5)": 4.151083081985194, "% 1": 0.0455168631752125, "% 2": 0.0510008225939128, "% 3": 0.1253084727173019, "% 4": 0.26323005209761446, "% 5": 0.5149437894159583}, {"Año": 2025, "Código": "IMP_10", "Indicador": "Incrementar redes de contactos", "N_Respuestas": 4362, "Top_2_Box (%)": 0.7888583218707015, "Promedio (1-5)": 4.216185236130215, "% 1": 0.044475011462631824, "% 2": 0.0479138010087116, "% 3": 0.11875286565795506, "% 4": 0.2246675836772123, "% 5": 0.5641907381934892}, {"Año": 2025, "Código": "IMP_11", "Indicador": "Trabajar con otras carreras", "N_Respuestas": 4362, "Top_2_Box (%)": 0.7491976157725814, "Promedio (1-5)": 4.073590096286107, "% 1": 0.07336084364970197, "% 2": 0.050664832645575426, "% 3": 0.1267767079321412, "% 4": 0.22741861531407612, "% 5": 0.5217790004585052}, {"Año": 2025, "Código": "IMP_12", "Indicador": "Conocer campo laboral", "N_Respuestas": 4372, "Top_2_Box (%)": 0.886779505946935, "Promedio (1-5)": 4.510064043915828, "% 1": 0.023559011893870083, "% 2": 0.0267612076852699, "% 3": 0.06290027447392497, "% 4": 0.18961573650503202, "% 5": 0.6971637694419031}, {"Año": 2025, "Código": "IMP_13", "Indicador": "Interactuar en contexto real", "N_Respuestas": 4366, "Top_2_Box (%)": 0.8925790196976637, "Promedio (1-5)": 4.542143838754008, "% 1": 0.02565277141548328, "% 2": 0.021759047182775996, "% 3": 0.06000916170407696, "% 4": 0.16994961062757674, "% 5": 0.722629409070087}, {"Año": 2025, "Código": "IMP_14", "Indicador": "Aportar desde el rol profesional", "N_Respuestas": 4375, "Top_2_Box (%)": 0.9227428571428572, "Promedio (1-5)": 4.629485714285714, "% 1": 0.011428571428571429, "% 2": 0.01577142857142857, "% 3": 0.050057142857142856, "% 4": 0.17737142857142857, "% 5": 0.7453714285714286}], "habilidades": [{"Año": 2022, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8670520231213873, "Promedio (1-5)": 4.3497109826589595, "% 1": 0.01568951279933939, "% 2": 0.018992568125516102, "% 3": 0.09826589595375723, "% 4": 0.33402146985962017, "% 5": 0.5330305532617672}, {"Año": 2023, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 1944, "Top_2_Box (%)": 0.9125514403292181, "Promedio (1-5)": 4.504115226337449, "% 1": 0.009259259259259259, "% 2": 0.00977366255144033, "% 3": 0.0684156378600823, "% 4": 0.2926954732510288, "% 5": 0.6198559670781894}, {"Año": 2024, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 3583, "Top_2_Box (%)": 0.8716159642757466, "Promedio (1-5)": 4.395757744906503, "% 1": 0.020373988277979347, "% 2": 0.025118615685180017, "% 3": 0.08289143176109405, "% 4": 0.2816075914038515, "% 5": 0.5900083728718951}, {"Año": 2025, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 4303, "Top_2_Box (%)": 0.9079711828956541, "Promedio (1-5)": 4.540785498489426, "% 1": 0.016732512200790146, "% 2": 0.017894492214733906, "% 3": 0.05740181268882175, "% 4": 0.22379735068556822, "% 5": 0.684173832210086}, {"Año": 2021, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 898, "Top_2_Box (%)": 0.8741648106904232, "Promedio (1-5)": 4.409799554565701, "% 1": 0.008908685968819599, "% 2": 0.015590200445434299, "% 3": 0.10133630289532294, "% 4": 0.3051224944320713, "% 5": 0.5690423162583519}, {"Año": 2022, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 2391, "Top_2_Box (%)": 0.890840652446675, "Promedio (1-5)": 4.411125052279381, "% 1": 0.0075282308657465494, "% 2": 0.017147636971978252, "% 3": 0.08448347971560016, "% 4": 0.3383521539104977, "% 5": 0.5524884985361773}, {"Año": 2023, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 1945, "Top_2_Box (%)": 0.9311053984575836, "Promedio (1-5)": 4.578920308483291, "% 1": 0.0035989717223650387, "% 2": 0.007712082262210797, "% 3": 0.05758354755784062, "% 4": 0.2683804627249357, "% 5": 0.6627249357326478}, {"Año": 2024, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 3585, "Top_2_Box (%)": 0.8722454672245468, "Promedio (1-5)": 4.39442119944212, "% 1": 0.01785216178521618, "% 2": 0.021478382147838215, "% 3": 0.08842398884239888, "% 4": 0.2928870292887029, "% 5": 0.5793584379358437}, {"Año": 2025, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 4283, "Top_2_Box (%)": 0.9087088489376606, "Promedio (1-5)": 4.522997898669157, "% 1": 0.01704412794770021, "% 2": 0.014709315900070045, "% 3": 0.059537707214569226, "% 4": 0.24562222741069345, "% 5": 0.6630866215269671}, {"Año": 2021, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 897, "Top_2_Box (%)": 0.8818283166109253, "Promedio (1-5)": 4.410256410256411, "% 1": 0.008918617614269788, "% 2": 0.014492753623188406, "% 3": 0.0947603121516165, "% 4": 0.3210702341137124, "% 5": 0.5607580824972129}, {"Año": 2022, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8897605284888522, "Promedio (1-5)": 4.43270024772915, "% 1": 0.008257638315441783, "% 2": 0.014037985136251032, "% 3": 0.087943848059455, "% 4": 0.31626754748142033, "% 5": 0.5734929810074318}, {"Año": 2023, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 1936, "Top_2_Box (%)": 0.940599173553719, "Promedio (1-5)": 4.600206611570248, "% 1": 0.0030991735537190084, "% 2": 0.006714876033057851, "% 3": 0.049586776859504134, "% 4": 0.2680785123966942, "% 5": 0.6725206611570248}, {"Año": 2024, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 3579, "Top_2_Box (%)": 0.8689578094439787, "Promedio (1-5)": 4.4084939927354005, "% 1": 0.020676166526962837, "% 2": 0.0262643196423582, "% 3": 0.0841017043867002, "% 4": 0.2618049734562727, "% 5": 0.6071528359877061}, {"Año": 2025, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 4278, "Top_2_Box (%)": 0.9104721832632071, "Promedio (1-5)": 4.539971949509116, "% 1": 0.014726507713884993, "% 2": 0.016362786348761104, "% 3": 0.0584385226741468, "% 4": 0.23515661524076673, "% 5": 0.6753155680224404}, {"Año": 2021, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 900, "Top_2_Box (%)": 0.8766666666666667, "Promedio (1-5)": 4.35, "% 1": 0.006666666666666667, "% 2": 0.013333333333333334, "% 3": 0.10333333333333333, "% 4": 0.37666666666666665, "% 5": 0.5}, {"Año": 2022, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 2389, "Top_2_Box (%)": 0.8580996232733361, "Promedio (1-5)": 4.3629133528673085, "% 1": 0.008790288823775638, "% 2": 0.019254918375889492, "% 3": 0.11385516952699874, "% 4": 0.316450397655923, "% 5": 0.5416492256174131}, {"Año": 2023, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 1943, "Top_2_Box (%)": 0.9161091096242924, "Promedio (1-5)": 4.53937210499228, "% 1": 0.004117344312918168, "% 2": 0.011322696860524962, "% 3": 0.06845084920226453, "% 4": 0.27328872876994337, "% 5": 0.6428203808543489}, {"Año": 2024, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 3573, "Top_2_Box (%)": 0.8701371396585502, "Promedio (1-5)": 4.390428211586902, "% 1": 0.01651273439686538, "% 2": 0.022949902043101034, "% 3": 0.09040022390148335, "% 4": 0.2938706968933669, "% 5": 0.5762664427651834}, {"Año": 2025, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 4261, "Top_2_Box (%)": 0.9089415630133771, "Promedio (1-5)": 4.509035437690683, "% 1": 0.014550574982398498, "% 2": 0.013377141516076038, "% 3": 0.06313072048814833, "% 4": 0.26636939685519834, "% 5": 0.6425721661581788}, {"Año": 2021, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 892, "Top_2_Box (%)": 0.8778026905829597, "Promedio (1-5)": 4.38677130044843, "% 1": 0.007847533632286996, "% 2": 0.01233183856502242, "% 3": 0.10201793721973094, "% 4": 0.34080717488789236, "% 5": 0.5369955156950673}, {"Año": 2022, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 2392, "Top_2_Box (%)": 0.8758361204013378, "Promedio (1-5)": 4.3938127090301, "% 1": 0.007525083612040134, "% 2": 0.014632107023411372, "% 3": 0.1020066889632107, "% 4": 0.3281772575250836, "% 5": 0.5476588628762542}, {"Año": 2023, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 1940, "Top_2_Box (%)": 0.931958762886598, "Promedio (1-5)": 4.5731958762886595, "% 1": 0.0036082474226804126, "% 2": 0.009278350515463918, "% 3": 0.05515463917525773, "% 4": 0.27422680412371137, "% 5": 0.6577319587628866}, {"Año": 2024, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 3575, "Top_2_Box (%)": 0.8760839160839161, "Promedio (1-5)": 4.423216783216783, "% 1": 0.015104895104895105, "% 2": 0.0220979020979021, "% 3": 0.08671328671328671, "% 4": 0.27664335664335665, "% 5": 0.5994405594405594}, {"Año": 2025, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 4262, "Top_2_Box (%)": 0.9160018770530267, "Promedio (1-5)": 4.556780854059127, "% 1": 0.015016424213984044, "% 2": 0.013843266072266542, "% 3": 0.055138432660722665, "% 4": 0.2313467855466917, "% 5": 0.6846550915063351}, {"Año": 2022, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 2387, "Top_2_Box (%)": 0.8462505236698785, "Promedio (1-5)": 4.302471721826561, "% 1": 0.011311269375785506, "% 2": 0.022203602848764138, "% 3": 0.12023460410557185, "% 4": 0.3452031839128613, "% 5": 0.5010473397570172}, {"Año": 2023, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 1946, "Top_2_Box (%)": 0.8869475847893115, "Promedio (1-5)": 4.435765673175745, "% 1": 0.007194244604316547, "% 2": 0.009249743062692703, "% 3": 0.09660842754367935, "% 4": 0.31449126413155193, "% 5": 0.5724563206577595}, {"Año": 2024, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 3561, "Top_2_Box (%)": 0.8323504633529908, "Promedio (1-5)": 4.276046054479079, "% 1": 0.021623139567537208, "% 2": 0.030609379387812413, "% 3": 0.11541701769165964, "% 4": 0.3147992137040157, "% 5": 0.517551249648975}, {"Año": 2025, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 4270, "Top_2_Box (%)": 0.8880562060889929, "Promedio (1-5)": 4.440983606557377, "% 1": 0.016159250585480095, "% 2": 0.014285714285714285, "% 3": 0.08149882903981265, "% 4": 0.28852459016393445, "% 5": 0.5995316159250585}, {"Año": 2021, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 899, "Top_2_Box (%)": 0.8798665183537263, "Promedio (1-5)": 4.404894327030034, "% 1": 0.00778642936596218, "% 2": 0.010011123470522803, "% 3": 0.10233592880978866, "% 4": 0.3292547274749722, "% 5": 0.5506117908787542}, {"Año": 2022, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 2392, "Top_2_Box (%)": 0.8712374581939799, "Promedio (1-5)": 4.366220735785953, "% 1": 0.007107023411371237, "% 2": 0.019230769230769232, "% 3": 0.1024247491638796, "% 4": 0.342809364548495, "% 5": 0.5284280936454849}, {"Año": 2023, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 1942, "Top_2_Box (%)": 0.9186405767250257, "Promedio (1-5)": 4.5319258496395465, "% 1": 0.001544799176107106, "% 2": 0.006179196704428424, "% 3": 0.07363542739443872, "% 4": 0.296086508753862, "% 5": 0.6225540679711637}, {"Año": 2024, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 3582, "Top_2_Box (%)": 0.8615298715801228, "Promedio (1-5)": 4.374930206588498, "% 1": 0.018983807928531545, "% 2": 0.028196538246789502, "% 3": 0.09128978224455611, "% 4": 0.28196538246789504, "% 5": 0.5795644891122278}, {"Año": 2025, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 4267, "Top_2_Box (%)": 0.9083665338645418, "Promedio (1-5)": 4.525427700960862, "% 1": 0.015233184907429108, "% 2": 0.01687368174361378, "% 3": 0.05952659948441528, "% 4": 0.24396531520974923, "% 5": 0.6644012186547926}, {"Año": 2022, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 2376, "Top_2_Box (%)": 0.8303872053872053, "Promedio (1-5)": 4.284511784511785, "% 1": 0.009259259259259259, "% 2": 0.018518518518518517, "% 3": 0.14183501683501684, "% 4": 0.3392255892255892, "% 5": 0.4911616161616162}, {"Año": 2023, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 1940, "Top_2_Box (%)": 0.8896907216494845, "Promedio (1-5)": 4.442268041237114, "% 1": 0.005670103092783505, "% 2": 0.014948453608247423, "% 3": 0.08969072164948454, "% 4": 0.31082474226804124, "% 5": 0.5788659793814434}, {"Año": 2024, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 3584, "Top_2_Box (%)": 0.8618861607142857, "Promedio (1-5)": 4.391462053571429, "% 1": 0.015625, "% 2": 0.029296875, "% 3": 0.09319196428571429, "% 4": 0.27176339285714285, "% 5": 0.5901227678571429}, {"Año": 2025, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 4279, "Top_2_Box (%)": 0.9161018929656461, "Promedio (1-5)": 4.546623042767002, "% 1": 0.014956765599439122, "% 2": 0.014723066136947885, "% 3": 0.054218275297966814, "% 4": 0.2409441458284646, "% 5": 0.6751577471371816}, {"Año": 2021, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 903, "Top_2_Box (%)": 0.8471760797342193, "Promedio (1-5)": 4.258028792912514, "% 1": 0.006644518272425249, "% 2": 0.014396456256921373, "% 3": 0.13178294573643412, "% 4": 0.40863787375415284, "% 5": 0.43853820598006643}, {"Año": 2022, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 2389, "Top_2_Box (%)": 0.8526580159062369, "Promedio (1-5)": 4.343658434491419, "% 1": 0.011720385098367517, "% 2": 0.019254918375889492, "% 3": 0.11636668061950607, "% 4": 0.3189619087484303, "% 5": 0.5336961071578066}, {"Año": 2023, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 1940, "Top_2_Box (%)": 0.9056701030927835, "Promedio (1-5)": 4.507731958762887, "% 1": 0.0036082474226804126, "% 2": 0.013402061855670102, "% 3": 0.07731958762886598, "% 4": 0.2829896907216495, "% 5": 0.622680412371134}, {"Año": 2021, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 902, "Top_2_Box (%)": 0.852549889135255, "Promedio (1-5)": 4.349223946784923, "% 1": 0.012195121951219513, "% 2": 0.017738359201773836, "% 3": 0.11751662971175167, "% 4": 0.3137472283813747, "% 5": 0.5388026607538803}, {"Año": 2022, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 2393, "Top_2_Box (%)": 0.8499791057250313, "Promedio (1-5)": 4.316757208524864, "% 1": 0.014208106978687839, "% 2": 0.025073129962390306, "% 3": 0.11073965733389052, "% 4": 0.32971165900543253, "% 5": 0.5202674467195988}, {"Año": 2023, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 1944, "Top_2_Box (%)": 0.8909465020576132, "Promedio (1-5)": 4.482510288065844, "% 1": 0.006172839506172839, "% 2": 0.016975308641975308, "% 3": 0.08590534979423868, "% 4": 0.2700617283950617, "% 5": 0.6208847736625515}, {"Año": 2025, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 4266, "Top_2_Box (%)": 0.9057665260196905, "Promedio (1-5)": 4.531411157993436, "% 1": 0.01969057665260197, "% 2": 0.014767932489451477, "% 3": 0.05977496483825598, "% 4": 0.22597280825128926, "% 5": 0.6797937177684014}, {"Año": 2021, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 899, "Top_2_Box (%)": 0.8342602892102335, "Promedio (1-5)": 4.310344827586207, "% 1": 0.010011123470522803, "% 2": 0.021134593993325918, "% 3": 0.13459399332591768, "% 4": 0.3170189098998888, "% 5": 0.5172413793103449}, {"Año": 2022, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 2383, "Top_2_Box (%)": 0.8489299202685691, "Promedio (1-5)": 4.348720100713386, "% 1": 0.01174989509022241, "% 2": 0.02433906840117499, "% 3": 0.11498111624003357, "% 4": 0.3013008812421318, "% 5": 0.5476290390264372}, {"Año": 2023, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 1926, "Top_2_Box (%)": 0.8935617860851506, "Promedio (1-5)": 4.481827622014538, "% 1": 0.012980269989615784, "% 2": 0.018691588785046728, "% 3": 0.07476635514018691, "% 4": 0.26064382139148495, "% 5": 0.6329179646936657}, {"Año": 2024, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 3582, "Top_2_Box (%)": 0.8531546621998883, "Promedio (1-5)": 4.3542713567839195, "% 1": 0.017587939698492462, "% 2": 0.03210496929089894, "% 3": 0.09715242881072027, "% 4": 0.2847571189279732, "% 5": 0.5683975432719152}, {"Año": 2024, "Código": "HAB_12", "Indicador": "Autoconsciencia", "N_Respuestas": 3578, "Top_2_Box (%)": 0.8630519843487983, "Promedio (1-5)": 4.395472330911123, "% 1": 0.022638345444382337, "% 2": 0.02627166014533259, "% 3": 0.08803801006148687, "% 4": 0.25908328675237563, "% 5": 0.6039686975964226}], "indicadores": [{"Año": 2021, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 903, "Resultado (%)": 0.8815060908084164}, {"Año": 2022, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 2403, "Resultado (%)": 0.8555971702039118}, {"Año": 2023, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 1949, "Resultado (%)": 0.9076449461262186}, {"Año": 2024, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 3967, "Resultado (%)": 0.8404335770103353}, {"Año": 2025, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 4622, "Resultado (%)": 0.87559498052791}, {"Año": 2021, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 904, "Resultado (%)": 0.879424778761062}, {"Año": 2022, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 2405, "Resultado (%)": 0.8798336798336799}, {"Año": 2023, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 1950, "Resultado (%)": 0.9338461538461539}, {"Año": 2024, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 3502, "Resultado (%)": 0.846087949743004}, {"Año": 2025, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 4341, "Resultado (%)": 0.8730707210320203}, {"Año": 2021, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 905, "Resultado (%)": 0.8419889502762431}, {"Año": 2022, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 2405, "Resultado (%)": 0.8054054054054054}, {"Año": 2023, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 1943, "Resultado (%)": 0.8605249613998971}, {"Año": 2024, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 3526, "Resultado (%)": 0.7912648893930799}, {"Año": 2025, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 4323, "Resultado (%)": 0.650705528568124}, {"Año": 2021, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 907, "Resultado (%)": 0.9713340683572216}, {"Año": 2022, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 2403, "Resultado (%)": 0.9558884727424053}, {"Año": 2023, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 1946, "Resultado (%)": 0.9707091469681398}, {"Año": 2024, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 3514, "Resultado (%)": 0.9450768355150825}, {"Año": 2025, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 4294, "Resultado (%)": 0.9373544480670704}, {"Año": 2021, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 901, "Resultado (%)": 0.9411764705882353}, {"Año": 2022, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 2394, "Resultado (%)": 0.935672514619883}, {"Año": 2023, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 1942, "Resultado (%)": 0.9387229660144182}, {"Año": 2024, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 3591, "Resultado (%)": 0.9019771651350599}, {"Año": 2024, "Indicador": "Sabía que era VcM (% Sí)", "N_Respuestas": 3541, "Resultado (%)": 0.8602089805139791}, {"Año": 2025, "Indicador": "Sabía que era VcM (% Sí)", "N_Respuestas": 4335, "Resultado (%)": 0.8590542099192618}], "valores": [{"Año": 2021, "Valor Sebastiano": "Responsabilidad", "Menciones": 546, "% de Estudiantes": 0.5993413830954994}, {"Año": 2021, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 404, "% de Estudiantes": 0.4434687156970362}, {"Año": 2021, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 358, "% de Estudiantes": 0.3929747530186608}, {"Año": 2021, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 222, "% de Estudiantes": 0.24368825466520308}, {"Año": 2021, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 212, "% de Estudiantes": 0.2327113062568606}, {"Año": 2021, "Valor Sebastiano": "Honestidad", "Menciones": 131, "% de Estudiantes": 0.1437980241492865}, {"Año": 2021, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 109, "% de Estudiantes": 0.11964873765093303}, {"Año": 2021, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 82, "% de Estudiantes": 0.09001097694840834}, {"Año": 2021, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 71, "% de Estudiantes": 0.07793633369923161}, {"Año": 2021, "Valor Sebastiano": "Ninguno", "Menciones": 9, "% de Estudiantes": 0.009879253567508232}, {"Año": 2022, "Valor Sebastiano": "Responsabilidad", "Menciones": 1572, "% de Estudiantes": 0.6490503715937241}, {"Año": 2022, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 1085, "% de Estudiantes": 0.4479768786127168}, {"Año": 2022, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 982, "% de Estudiantes": 0.40545004128819156}, {"Año": 2022, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 583, "% de Estudiantes": 0.24071015689512798}, {"Año": 2022, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 573, "% de Estudiantes": 0.2365813377374071}, {"Año": 2022, "Valor Sebastiano": "Honestidad", "Menciones": 410, "% de Estudiantes": 0.16928158546655656}, {"Año": 2022, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 313, "% de Estudiantes": 0.1292320396366639}, {"Año": 2022, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 308, "% de Estudiantes": 0.12716763005780346}, {"Año": 2022, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 145, "% de Estudiantes": 0.05986787778695293}, {"Año": 2022, "Valor Sebastiano": "Ninguno", "Menciones": 7, "% de Estudiantes": 0.002890173410404624}, {"Año": 2023, "Valor Sebastiano": "Responsabilidad", "Menciones": 1289, "% de Estudiantes": 0.6600102406554019}, {"Año": 2023, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 909, "% de Estudiantes": 0.46543778801843316}, {"Año": 2023, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 907, "% de Estudiantes": 0.4644137224782386}, {"Año": 2023, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 510, "% de Estudiantes": 0.261136712749616}, {"Año": 2023, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 432, "% de Estudiantes": 0.22119815668202766}, {"Año": 2023, "Valor Sebastiano": "Honestidad", "Menciones": 329, "% de Estudiantes": 0.16845878136200718}, {"Año": 2023, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 315, "% de Estudiantes": 0.16129032258064516}, {"Año": 2023, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 304, "% de Estudiantes": 0.15565796210957503}, {"Año": 2023, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 142, "% de Estudiantes": 0.07270865335381464}, {"Año": 2023, "Valor Sebastiano": "Ninguno", "Menciones": 3, "% de Estudiantes": 0.0015360983102918587}, {"Año": 2024, "Valor Sebastiano": "La responsabilidad y la prudencia", "Menciones": 2181, "% de Estudiantes": 0.5493702770780856}, {"Año": 2024, "Valor Sebastiano": "La solidaridad y alegría de servir", "Menciones": 2002, "% de Estudiantes": 0.5042821158690176}, {"Año": 2024, "Valor Sebastiano": "La racionalidad y capacidad de reflexión", "Menciones": 1325, "% de Estudiantes": 0.3337531486146096}, {"Año": 2024, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 1238, "% de Estudiantes": 0.3118387909319899}, {"Año": 2024, "Valor Sebastiano": "El espíritu de superación", "Menciones": 855, "% de Estudiantes": 0.21536523929471033}, {"Año": 2024, "Valor Sebastiano": "La tolerancia", "Menciones": 693, "% de Estudiantes": 0.17455919395465994}, {"Año": 2024, "Valor Sebastiano": "La honestidad", "Menciones": 601, "% de Estudiantes": 0.15138539042821159}, {"Año": 2024, "Valor Sebastiano": "La dignidad superior de la persona humana", "Menciones": 594, "% de Estudiantes": 0.14962216624685137}, {"Año": 2024, "Valor Sebastiano": "El cultivo de la verdad", "Menciones": 286, "% de Estudiantes": 0.07204030226700252}, {"Año": 2024, "Valor Sebastiano": "La justicia", "Menciones": 266, "% de Estudiantes": 0.06700251889168765}, {"Año": 2025, "Valor Sebastiano": "La responsabilidad y la prudencia", "Menciones": 2116, "% de Estudiantes": 0.45711816807085764}, {"Año": 2025, "Valor Sebastiano": "La solidaridad y alegría de servir", "Menciones": 1804, "% de Estudiantes": 0.3897170015122057}, {"Año": 2025, "Valor Sebastiano": "La racionalidad y capacidad de reflexión", "Menciones": 1561, "% de Estudiantes": 0.33722186217325556}, {"Año": 2025, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 914, "% de Estudiantes": 0.19745085331605097}, {"Año": 2025, "Valor Sebastiano": "La tolerancia", "Menciones": 704, "% de Estudiantes": 0.1520846835169583}, {"Año": 2025, "Valor Sebastiano": "La dignidad superior de la persona humana", "Menciones": 649, "% de Estudiantes": 0.14020306761719595}, {"Año": 2025, "Valor Sebastiano": "El espíritu de superación", "Menciones": 597, "% de Estudiantes": 0.1289695398574206}, {"Año": 2025, "Valor Sebastiano": "La honestidad", "Menciones": 541, "% de Estudiantes": 0.11687189457766256}, {"Año": 2025, "Valor Sebastiano": "La justicia", "Menciones": 326, "% de Estudiantes": 0.0704255778785915}, {"Año": 2025, "Valor Sebastiano": "El cultivo de la verdad", "Menciones": 307, "% de Estudiantes": 0.06632101965867358}]}; init();
+
+    function init() {
+      buildSection('imp', DATA.importancia, 'Indicador', 'Top_2_Box (%)');
+      buildSection('hab', DATA.habilidades, 'Indicador', 'Top_2_Box (%)');
+      buildIndicadores();
+      buildValoresSection();
+      buildTrends();
+    }
+
+
+    function setChartHeight(canvas, h) {
+      canvas.parentElement.style.height = h + 'px';
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('sec-' + id).classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    /* ═══════ GENERIC SECTION BUILDER (imp, hab) ═══════ */
+    function buildSection(key, rawData, labelField, valueField) {
+      const years = [...new Set(rawData.map(r => r['Año']))].sort();
+      const items = [...new Set(rawData.map(r => r[labelField]))];
+      sectionState[key] = { rawData, labelField, valueField, selectedYear: null, activeItems: new Set(items), sortBy: 'default' };
+
+      // Year buttons
+      const yf = document.getElementById('yf-' + key);
+      const allBtn = document.createElement('button');
+      allBtn.className = 'year-btn active'; allBtn.textContent = 'Todos';
+      allBtn.onclick = () => { sectionState[key].selectedYear = null; refreshSection(key) };
+      yf.appendChild(allBtn);
+      years.forEach(y => {
+        const b = document.createElement('button'); b.className = 'year-btn'; b.textContent = y;
+        b.onclick = () => { sectionState[key].selectedYear = y; refreshSection(key) };
+        yf.appendChild(b);
+      });
+
+      // Control bar: Select All / None / Sort
+      const ctrl = document.getElementById('ctrl-' + key);
+      ctrl.innerHTML = '<button onclick="toggleAll(\'' + key + '\',true)">✓ Todos</button>'
+        + '<button onclick="toggleAll(\'' + key + '\',false)">✕ Ninguno</button>'
+        + '<button class="sort-btn" id="sort-' + key + '" onclick="toggleSort(\'' + key + '\')">↕ Ordenar por valor</button>'
+        + '<span class="item-count" id="count-' + key + '"></span>';
+
+      buildChips(key);
+      refreshSection(key);
+    }
+
+    function buildChips(key) {
+      const st = sectionState[key];
+      const container = document.getElementById('chips-' + key);
+      container.innerHTML = '';
+      const items = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      items.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'item-chip' + (st.activeItems.has(item) ? '' : ' off');
+        chip.textContent = item;
+        chip.onclick = () => {
+          if (st.activeItems.has(item)) st.activeItems.delete(item);
+          else st.activeItems.add(item);
+          chip.classList.toggle('off');
+          updateCount(key);
+          redrawChart(key);
+        };
+        container.appendChild(chip);
+      });
+      updateCount(key);
+    }
+
+    function updateCount(key) {
+      const st = sectionState[key];
+      const total = [...new Set(st.rawData.map(r => r[st.labelField]))].length;
+      document.getElementById('count-' + key).textContent = st.activeItems.size + ' de ' + total + ' seleccionados';
+    }
+
+    function toggleAll(key, on) {
+      const st = sectionState[key];
+      const items = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      if (on) items.forEach(i => st.activeItems.add(i));
+      else st.activeItems.clear();
+      document.querySelectorAll('#chips-' + key + ' .item-chip').forEach(c => {
+        if (on) c.classList.remove('off'); else c.classList.add('off');
+      });
+      updateCount(key);
+      redrawChart(key);
+    }
+
+    function toggleSort(key) {
+      const st = sectionState[key];
+      st.sortBy = st.sortBy === 'value' ? 'default' : 'value';
+      const btn = document.getElementById('sort-' + key);
+      btn.classList.toggle('active', st.sortBy === 'value');
+      btn.textContent = st.sortBy === 'value' ? '↕ Orden original' : '↕ Ordenar por valor';
+      redrawChart(key);
+    }
+
+    function refreshSection(key) {
+      // Update year button states
+      const st = sectionState[key];
+      document.querySelectorAll('#yf-' + key + ' .year-btn').forEach(b => {
+        if (st.selectedYear === null && b.textContent === 'Todos') b.classList.add('active');
+        else if (b.textContent == st.selectedYear) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+
+      // When year changes, reset active items to those available
+      const allItems = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      if (st.selectedYear !== null) {
+        const availItems = new Set(st.rawData.filter(r => r['Año'] === st.selectedYear).map(r => r[st.labelField]));
+        st.activeItems = new Set([...availItems]);
+      } else {
+        st.activeItems = new Set(allItems);
+      }
+      buildChips(key);
+      redrawChart(key);
+    }
+
+    function redrawChart(key) {
+      const st = sectionState[key];
+      const { rawData, labelField, valueField, selectedYear } = st;
+      const years = [...new Set(rawData.map(r => r['Año']))].sort();
+
+      if (charts[key]) charts[key].destroy();
+      const canvas = document.getElementById('chart-' + key);
+      const availEl = document.getElementById('avail-' + key);
+
+      const likertColors = ['#e64d3d', '#f3a81a', '#d9d9d9', '#73c273', '#009a74'];
+      const likertLabels = ['1', '2', '3', '4', '5'];
+
+      if (selectedYear !== null) {
+        // SINGLE YEAR
+        let filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
+        if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
+        const labels = filtered.map(r => r[labelField]);
+
+        const datasets = [1, 2, 3, 4, 5].map(level => {
+          return {
+             label: 'Nota ' + level,
+             data: filtered.map(r => r[`% ${level}`] * 100),
+             backgroundColor: likertColors[level-1],
+             barThickness: 22
+          }
+        });
+
+        // Availability note
+        const allItems = [...new Set(rawData.map(r => r[labelField]))];
+        const yearItems = new Set(rawData.filter(r => r['Año'] === selectedYear).map(r => r[labelField]));
+        const missing = allItems.filter(i => !yearItems.has(i));
+        if (missing.length > 0) {
+          availEl.innerHTML = '<strong>No disponible en ' + selectedYear + ':</strong> ' + missing.join(', ');
+          availEl.style.display = 'inline-block';
+        } else { availEl.style.display = 'none'; }
+
+        setChartHeight(canvas, Math.max(labels.length * 44, 180));
+        charts[key] = new Chart(canvas, {
+          type: 'bar',
+          data: { labels, datasets },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: { size: 11 } } },
+              tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw.toFixed(1) + '%' } }
+            },
+            scales: {
+              x: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
+              y: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
+            }
+          }
+        });
+      } else {
+        // ALL YEARS
+        availEl.style.display = 'none';
+        let items = [...st.activeItems];
+        if (st.sortBy === 'value') {
+          items.sort((a, b) => {
+            const avgA = rawData.filter(r => r[labelField] === a).reduce((s, r) => s + r[valueField], 0) / Math.max(1, rawData.filter(r => r[labelField] === a).length);
+            const avgB = rawData.filter(r => r[labelField] === b).reduce((s, r) => s + r[valueField], 0) / Math.max(1, rawData.filter(r => r[labelField] === b).length);
+            return avgB - avgA;
+          });
+        }
+        
+        const datasets = [];
+        years.forEach(y => {
+            [1,2,3,4,5].forEach(level => {
+                datasets.push({
+                    label: `Nota ${level}`,
+                    datasetYear: y,
+                    stack: y.toString(),
+                    data: items.map(item => {
+                        const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+                        return m ? (m[`% ${level}`] * 100) : 0;
+                    }),
+                    backgroundColor: likertColors[level-1],
+                    barThickness: 14
+                });
+            });
+        });
+
+        setChartHeight(canvas, Math.max(items.length * 80, 300));
+        charts[key] = new Chart(canvas, {
+          type: 'bar',
+          data: { labels: items, datasets },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                 position: 'top', 
+                 labels: { 
+                    color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: { size: 11 },
+                    filter: function(item, chart) {
+                        // Only show legend for the first 5 datasets (which corresponds to 1 year's 1-5 scale)
+                        return item.datasetIndex < 5;
+                    }
+                 } 
+              },
+              tooltip: { 
+                 callbacks: { 
+                    label: c => 'Año ' + c.dataset.datasetYear + ' - ' + c.dataset.label + ': ' + (c.raw > 0 ? c.raw.toFixed(1) + '%' : '0%') 
+                 } 
+              }
+            },
+            scales: {
+              x: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
+              y: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
+            }
+          }
+        });
+      }
+    }
+
+    /* ═══════ INDICADORES (unchanged logic) ═══════ */
+    function buildIndicadores() {
+      const years = [...new Set(DATA.indicadores.map(r => r['Año']))].sort();
+      const container = document.getElementById('yf-ind');
+      years.forEach(y => {
+        const b = document.createElement('button');
+        b.className = 'year-btn' + (y === 2025 ? ' active' : ''); b.textContent = y;
+        b.onclick = () => {
+          document.querySelectorAll('#yf-ind .year-btn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          renderIndicadores(y);
+        };
+        container.appendChild(b);
+      });
+      renderIndicadores(2025);
+    }
+
+    function renderIndicadores(year) {
+      const filtered = DATA.indicadores.filter(r => r['Año'] === year);
+      if (charts.ind) charts.ind.destroy();
+      const canvas = document.getElementById('chart-ind');
+      setChartHeight(canvas, Math.max(filtered.length * 50, 200));
+      charts.ind = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(r => r['Indicador']),
+          datasets: [{
+            data: filtered.map(r => r['Resultado (%)'] * 100),
+            backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
+            borderRadius: 6, borderSkipped: false
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } } },
+          scales: {
+            x: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } },
+            y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 12 } } }
+          }
+        }
+      });
+    }
+
+    /* ═══════ VALORES SEBASTIANOS (with toggles) ═══════ */
+    function buildValoresSection() {
+      const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
+      sectionState['val'] = { selectedYear: 2025, activeItems: new Set(), sortBy: 'value' };
+      const container = document.getElementById('yf-val');
+      years.forEach(y => {
+        const b = document.createElement('button');
+        b.className = 'year-btn' + (y === 2025 ? ' active' : ''); b.textContent = y;
+        b.onclick = () => {
+          document.querySelectorAll('#yf-val .year-btn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          sectionState['val'].selectedYear = y;
+          refreshValores();
+        };
+        container.appendChild(b);
+      });
+
+      const ctrl = document.getElementById('ctrl-val');
+      ctrl.innerHTML = '<button onclick="toggleAllVal(true)">✓ Todos</button>'
+        + '<button onclick="toggleAllVal(false)">✕ Ninguno</button>'
+        + '<button class="sort-btn active" id="sort-val" onclick="toggleSortVal()">↕ Ordenar por valor</button>'
+        + '<span class="item-count" id="count-val"></span>';
+
+      refreshValores();
+    }
+
+    function toggleSortVal() {
+      const st = sectionState['val'];
+      st.sortBy = st.sortBy === 'value' ? 'default' : 'value';
+      const btn = document.getElementById('sort-val');
+      btn.classList.toggle('active', st.sortBy === 'value');
+      btn.textContent = st.sortBy === 'value' ? '↕ Orden original' : '↕ Ordenar por valor';
+      redrawValores();
+    }
+
+    function refreshValores() {
+      const st = sectionState['val'];
+      const year = st.selectedYear;
+      const items = DATA.valores.filter(r => r['Año'] === year).map(r => r['Valor Sebastiano']);
+      st.activeItems = new Set(items);
+      buildValChips();
+      redrawValores();
+    }
+
+    function buildValChips() {
+      const st = sectionState['val'];
+      const year = st.selectedYear;
+      // Chips are always sorted by value for easier finding
+      const items = DATA.valores.filter(r => r['Año'] === year).sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']).map(r => r['Valor Sebastiano']);
+      const container = document.getElementById('chips-val');
+      container.innerHTML = '';
+      items.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'item-chip' + (st.activeItems.has(item) ? '' : ' off');
+        chip.textContent = item;
+        chip.onclick = () => {
+          if (st.activeItems.has(item)) st.activeItems.delete(item);
+          else st.activeItems.add(item);
+          chip.classList.toggle('off');
+          updateValCount();
+          redrawValores();
+        };
+        container.appendChild(chip);
+      });
+      updateValCount();
+    }
+
+    function updateValCount() {
+      const st = sectionState['val'];
+      const total = DATA.valores.filter(r => r['Año'] === st.selectedYear).length;
+      document.getElementById('count-val').textContent = st.activeItems.size + ' de ' + total + ' seleccionados';
+    }
+
+    function toggleAllVal(on) {
+      const st = sectionState['val'];
+      const items = DATA.valores.filter(r => r['Año'] === st.selectedYear).map(r => r['Valor Sebastiano']);
+      if (on) items.forEach(i => st.activeItems.add(i)); else st.activeItems.clear();
+      document.querySelectorAll('#chips-val .item-chip').forEach(c => {
+        if (on) c.classList.remove('off'); else c.classList.add('off');
+      });
+      updateValCount();
+      redrawValores();
+    }
+
+    function redrawValores() {
+      const st = sectionState['val'];
+      const year = st.selectedYear;
+      let filtered = DATA.valores.filter(r => r['Año'] === year && st.activeItems.has(r['Valor Sebastiano']));
+
+      if (st.sortBy === 'value') {
+        filtered.sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']);
+      } else {
+        // Default order: alphabetically for values if not sorting by value, or keeping original order if it had one
+        filtered.sort((a, b) => a['Valor Sebastiano'].localeCompare(b['Valor Sebastiano']));
+      }
+      if (charts.val) charts.val.destroy();
+      const canvas = document.getElementById('chart-val');
+      setChartHeight(canvas, Math.max(filtered.length * 48, 180));
+      charts.val = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(r => r['Valor Sebastiano']),
+          datasets: [{
+            data: filtered.map(r => r['% de Estudiantes'] * 100),
+            backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
+            borderRadius: 6, borderSkipped: false, barThickness: 24
+          }]
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw.toFixed(1) + '%' } } },
+          scales: {
+            x: { min: 0, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v.toFixed(0) + '%' } },
+            y: { grid: { display: false }, ticks: { color: '#333333', font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    /* ═══════ TRENDS (unchanged) ═══════ */
+    function buildTrends() {
+      const years = [2021, 2022, 2023, 2024, 2025];
+      const topHab = ['Empatía', 'Comunicación efectiva', 'Trabajo en equipo / Colaboración', 'Adaptación y flexibilidad'];
+      const ds1 = topHab.map((h, i) => ({
+        label: h, borderColor: COLORS[i], backgroundColor: COLORS[i] + '33',
+        data: years.map(y => { const m = DATA.habilidades.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Top_2_Box (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5
+      }));
+      charts.trend1 = new Chart(document.getElementById('chart-trend1'), {
+        type: 'line', data: { labels: years, datasets: ds1 },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Top 4 Habilidades (T2B %)', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 70, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+      });
+      const topImp = ['Conocer la realidad (problemas/desafíos)', 'Aplicar lo aprendido en clases', 'Fortalecer vocación profesional', 'Fortalecer valores sebastianos'];
+      const ds2 = topImp.map((h, i) => ({
+        label: h, borderColor: COLORS[i + 4], backgroundColor: COLORS[i + 4] + '33',
+        data: years.map(y => { const m = DATA.importancia.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Top_2_Box (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5
+      }));
+      charts.trend2 = new Chart(document.getElementById('chart-trend2'), {
+        type: 'line', data: { labels: years, datasets: ds2 },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Top 4 Aspectos Formativos (T2B %)', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+      });
+      const indNames = ['Significancia en Formación (T2B)', 'Expectativas Cumplidas (T2B)', 'Recomendaría a compañeros (% Sí)'];
+      const ds3 = indNames.map((h, i) => ({
+        label: h, borderColor: COLORS[i + 8], backgroundColor: COLORS[i + 8] + '33',
+        data: years.map(y => { const m = DATA.indicadores.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Resultado (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5
+      }));
+      charts.trend3 = new Chart(document.getElementById('chart-trend3'), {
+        type: 'line', data: { labels: years, datasets: ds3 },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Indicadores Principales', color: '#333333', font: { size: 14 } }, legend: { labels: { color: '#666666', font: { size: 10 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', callback: v => v + '%' } } } }
+      });
+      const partData = [{ y: 2021, n: 911 }, { y: 2022, n: 2422 }, { y: 2023, n: 1953 }, { y: 2024, n: 3970 }, { y: 2025, n: 4629 }];
+      charts.trend4 = new Chart(document.getElementById('chart-trend4'), {
+        type: 'bar', data: { labels: years, datasets: [{ label: 'Estudiantes encuestados', data: partData.map(d => d.n), backgroundColor: years.map(y => YEAR_COLORS[y] + 'cc'), borderRadius: 8 }] },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Participación por Año', color: '#333333', font: { size: 14 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666' } } } }
+      });
+    }
+  </script>
+</body>
+
+</html>
