@@ -395,9 +395,19 @@ function buildValoresSection(){
   const ctrl=document.getElementById('ctrl-val');
   ctrl.innerHTML='<button onclick="toggleAllVal(true)">✓ Todos</button>'
     +'<button onclick="toggleAllVal(false)">✕ Ninguno</button>'
+    +'<button class="sort-btn active" id="sort-val" onclick="toggleSortVal()">↕ Ordenar por valor</button>'
     +'<span class="item-count" id="count-val"></span>';
 
   refreshValores();
+}
+
+function toggleSortVal(){
+  const st=sectionState['val'];
+  st.sortBy=st.sortBy==='value'?'default':'value';
+  const btn=document.getElementById('sort-val');
+  btn.classList.toggle('active',st.sortBy==='value');
+  btn.textContent=st.sortBy==='value'?'↕ Orden original':'↕ Ordenar por valor';
+  redrawValores();
 }
 
 function refreshValores(){
@@ -412,6 +422,7 @@ function refreshValores(){
 function buildValChips(){
   const st=sectionState['val'];
   const year=st.selectedYear;
+  // Chips are always sorted by value for easier finding
   const items=DATA.valores.filter(r=>r['Año']===year).sort((a,b)=>b['% de Estudiantes']-a['% de Estudiantes']).map(r=>r['Valor Sebastiano']);
   const container=document.getElementById('chips-val');
   container.innerHTML='';
@@ -451,8 +462,14 @@ function toggleAllVal(on){
 function redrawValores(){
   const st=sectionState['val'];
   const year=st.selectedYear;
-  const filtered=DATA.valores.filter(r=>r['Año']===year && st.activeItems.has(r['Valor Sebastiano']))
-    .sort((a,b)=>b['% de Estudiantes']-a['% de Estudiantes']);
+  let filtered=DATA.valores.filter(r=>r['Año']===year && st.activeItems.has(r['Valor Sebastiano']));
+  
+  if(st.sortBy==='value') {
+      filtered.sort((a,b)=>b['% de Estudiantes']-a['% de Estudiantes']);
+  } else {
+      // Default order: alphabetically for values if not sorting by value, or keeping original order if it had one
+      filtered.sort((a,b)=>a['Valor Sebastiano'].localeCompare(b['Valor Sebastiano']));
+  }
   if(charts.val)charts.val.destroy();
   const canvas=document.getElementById('chart-val');
   setChartHeight(canvas, Math.max(filtered.length*48,180));
@@ -519,3 +536,4 @@ function buildTrends(){
 </script>
 </body>
 </html>
+
