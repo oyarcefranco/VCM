@@ -691,7 +691,7 @@
         });
 
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(items.length * 65, 300));
+        else setChartHeight(canvas, Math.max(items.length * 120, 300));
         
         charts[key] = new Chart(canvas, {
           type: 'bar',
@@ -789,8 +789,8 @@
       
       if (isAll) {
           labels = items;
-          indexAxis = 'x';
-          setChartHeight(canvas, 400);
+          indexAxis = 'y';
+          setChartHeight(canvas, Math.max(labels.length * 100, 400));
           const years = [...new Set(DATA.indicadores.map(r => r['Año']))].sort();
           datasets = years.map(y => {
              const data = labels.map(label => {

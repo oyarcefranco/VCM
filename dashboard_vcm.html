@@ -602,7 +602,7 @@
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(labels.length * 35, 180));
         
-        charts[key] = new Chart(canvas, {
+        charts[sec] = new Chart(canvas, {
           type: 'bar',
           data: {
             labels, datasets: [{
@@ -655,9 +655,9 @@
         }));
         
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(items.length * 65, 300));
+        else setChartHeight(canvas, Math.max(items.length * 100, 300));
         
-        charts[key] = new Chart(canvas, {
+        charts[sec] = new Chart(canvas, {
           type: 'bar',
           data: { labels: items, datasets },
           options: {
