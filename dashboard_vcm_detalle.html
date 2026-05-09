@@ -607,7 +607,7 @@
         } else { availEl.style.display = 'none'; }
 
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(labels.length * 35, 180));
+        else setChartHeight(canvas, Math.max(labels.length * 80, 300));
         
         charts[key] = new Chart(canvas, {
           type: 'bar',
@@ -620,6 +620,8 @@
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 14 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
                 formatter: (value, context) => {
                     const datasetIndex = context.datasetIndex; // 0=Nota 1, 4=Nota 5
                     if (datasetIndex >= 3 && value >= 4.0) return (value.toFixed(2) + '%').replace('.', ',');
@@ -669,7 +671,7 @@
         });
 
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(items.length * 120, 300));
+        else setChartHeight(canvas, Math.max(items.length * 180, 450));
         
         charts[key] = new Chart(canvas, {
           type: 'bar',
@@ -703,6 +705,8 @@
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 13 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
                 formatter: (value, context) => {
                     const level = (context.datasetIndex % 5) + 1; // 1 to 5
                     if (level >= 4 && value >= 4.0) return (value.toFixed(2) + '%').replace('.', ',');
@@ -768,7 +772,7 @@
       if (isAll) {
           labels = items;
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(labels.length * 100, 400));
+          setChartHeight(canvas, Math.max(labels.length * 180, 450));
           const years = [...new Set(DATA.indicadores.map(r => r['Año']))].sort();
           datasets = years.map(y => {
              const data = labels.map(label => {
@@ -787,7 +791,7 @@
           const filtered = DATA.indicadores.filter(r => r['Año'] === year);
           labels = filtered.map(r => r['Indicador']);
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(filtered.length * 50, 250));
+          setChartHeight(canvas, Math.max(filtered.length * 80, 300));
           datasets = [{
             data: filtered.map(r => r['Resultado (%)'] * 100),
             backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length]),
@@ -806,6 +810,8 @@
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 14 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
                 formatter: (value) => value ? (value.toFixed(2) + '%').replace('.', ',') : ''
               },
               tooltip: { 
@@ -863,7 +869,7 @@
       if (isAll) {
           labels = items;
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(labels.length * 100, 400));
+          setChartHeight(canvas, Math.max(labels.length * 180, 450));
           const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
           datasets = years.map(y => {
              const data = labels.map(label => {
@@ -883,7 +889,7 @@
           filtered.sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']);
           labels = filtered.map(r => r['Valor Sebastiano']);
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(filtered.length * 50, 250));
+          setChartHeight(canvas, Math.max(filtered.length * 80, 300));
           datasets = [{
             data: filtered.map(r => r['% de Estudiantes'] * 100),
             backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length]),
@@ -902,6 +908,8 @@
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 14 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
                 formatter: (value) => value ? (value.toFixed(2) + '%').replace('.', ',') : ''
               },
               tooltip: { 
