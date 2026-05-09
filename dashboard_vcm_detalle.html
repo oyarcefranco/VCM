@@ -607,7 +607,7 @@
         } else { availEl.style.display = 'none'; }
 
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(labels.length * 80, 300));
+        else setChartHeight(canvas, Math.max(labels.length * 55, 250));
         
         charts[key] = new Chart(canvas, {
           type: 'bar',
@@ -671,7 +671,7 @@
         });
 
         if (isSingleItem) setChartHeight(canvas, 400);
-        else setChartHeight(canvas, Math.max(items.length * 180, 450));
+        else setChartHeight(canvas, Math.max(items.length * 150, 450));
         
         charts[key] = new Chart(canvas, {
           type: 'bar',
@@ -772,7 +772,7 @@
       if (isAll) {
           labels = items;
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(labels.length * 180, 450));
+          setChartHeight(canvas, Math.max(labels.length * 150, 450));
           const years = [...new Set(DATA.indicadores.map(r => r['Año']))].sort();
           datasets = years.map(y => {
              const data = labels.map(label => {
@@ -791,7 +791,7 @@
           const filtered = DATA.indicadores.filter(r => r['Año'] === year);
           labels = filtered.map(r => r['Indicador']);
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(filtered.length * 80, 300));
+          setChartHeight(canvas, Math.max(filtered.length * 55, 250));
           datasets = [{
             data: filtered.map(r => r['Resultado (%)'] * 100),
             backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length]),
@@ -869,7 +869,7 @@
       if (isAll) {
           labels = items;
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(labels.length * 180, 450));
+          setChartHeight(canvas, Math.max(labels.length * 150, 450));
           const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
           datasets = years.map(y => {
              const data = labels.map(label => {
@@ -889,7 +889,7 @@
           filtered.sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']);
           labels = filtered.map(r => r['Valor Sebastiano']);
           indexAxis = 'y';
-          setChartHeight(canvas, Math.max(filtered.length * 80, 300));
+          setChartHeight(canvas, Math.max(filtered.length * 55, 250));
           datasets = [{
             data: filtered.map(r => r['% de Estudiantes'] * 100),
             backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length]),
