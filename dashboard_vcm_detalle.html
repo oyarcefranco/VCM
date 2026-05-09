@@ -421,9 +421,6 @@
       <div class="section-sub">Pregunta: "Identifica qué Valores Sebastianos estuvieron presentes en el proyecto" ·
         Selección múltiple · Métrica: % de estudiantes que lo marcó</div>
       <div class="year-filter" id="yf-val"></div>
-      <div class="item-controls" id="ctrl-val"></div>
-      <div class="item-chips" id="chips-val"></div>
-      <div id="avail-val" class="avail-note"></div>
       <div class="chart-wrap"><canvas id="chart-val"></canvas></div>
     </div>
     <div id="sec-trend" class="section hidden">
@@ -460,7 +457,7 @@
       buildSection('imp', DATA.importancia, 'Indicador', 'Top_2_Box (%)');
       buildSection('hab', DATA.habilidades, 'Indicador', 'Top_2_Box (%)');
       buildIndicadores();
-      buildSection('val', DATA.valores, 'Valor Sebastiano', '% de Estudiantes');
+      buildValores();
       buildTrends();
     }
 
@@ -843,6 +840,104 @@
         }
       });
     }
+
+    function buildValores() {
+      const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
+      const container = document.getElementById('yf-val');
+      container.innerHTML = '';
+      
+      const allBtn = document.createElement('button');
+      allBtn.className = 'year-btn active'; allBtn.textContent = 'Todos los años';
+      allBtn.onclick = () => {
+        document.querySelectorAll('#yf-val .year-btn').forEach(x => x.classList.remove('active'));
+        allBtn.classList.add('active');
+        renderValores('Todos los años');
+      };
+      container.appendChild(allBtn);
+
+      years.forEach(y => {
+        const b = document.createElement('button');
+        b.className = 'year-btn'; b.textContent = y;
+        b.onclick = () => {
+          document.querySelectorAll('#yf-val .year-btn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          renderValores(y);
+        };
+        container.appendChild(b);
+      });
+      renderValores('Todos los años');
+    }
+
+    function renderValores(year) {
+      const isAll = year === 'Todos los años';
+      const items = [...new Set(DATA.valores.map(r => r['Valor Sebastiano']))];
+      
+      if (charts.val) charts.val.destroy();
+      const canvas = document.getElementById('chart-val');
+      
+      let datasets;
+      let labels;
+      let indexAxis;
+      
+      if (isAll) {
+          labels = items;
+          indexAxis = 'y';
+          setChartHeight(canvas, Math.max(labels.length * 100, 400));
+          const years = [...new Set(DATA.valores.map(r => r['Año']))].sort();
+          datasets = years.map(y => {
+             const data = labels.map(label => {
+                 const match = DATA.valores.find(r => r['Año'] === y && r['Valor Sebastiano'] === label);
+                 return match ? match['% de Estudiantes'] * 100 : null;
+             });
+             return {
+                 label: y,
+                 data: data,
+                 backgroundColor: YEAR_COLORS[y],
+                 borderRadius: 6,
+                 barThickness: 12
+             };
+          });
+      } else {
+          let filtered = DATA.valores.filter(r => r['Año'] === year);
+          filtered.sort((a, b) => b['% de Estudiantes'] - a['% de Estudiantes']);
+          labels = filtered.map(r => r['Valor Sebastiano']);
+          indexAxis = 'y';
+          setChartHeight(canvas, Math.max(filtered.length * 50, 250));
+          datasets = [{
+            data: filtered.map(r => r['% de Estudiantes'] * 100),
+            backgroundColor: filtered.map((_, i) => COLORS[i % COLORS.length]),
+            borderRadius: 6, barThickness: 18
+          }];
+      }
+
+      charts.val = new Chart(canvas, {
+        type: 'bar',
+        data: { labels: labels, datasets: datasets },
+        options: {
+          indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
+          plugins: { 
+              legend: { display: isAll, position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 13 } } },
+              title: { display: true, text: 'Valores Sebastianos: ' + year, font: { size: 16 } },
+              datalabels: {
+                color: '#fff',
+                font: { weight: 'bold', size: 12 },
+                formatter: (value) => value ? (value.toFixed(2) + '%').replace('.', ',') : ''
+              },
+              tooltip: { 
+                  titleFont: { size: 14 },
+                  bodyFont: { size: 14 },
+                  callbacks: { label: c => (isAll ? c.dataset.label + ': ' : '') + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') } 
+              }
+          },
+          scales: {
+            [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 13 }, callback: v => v + '%' } },
+            [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 13 } } }
+          }
+        }
+      });
+    }
+
+
 
 
 
