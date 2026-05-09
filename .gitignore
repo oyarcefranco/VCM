@@ -1,0 +1,7 @@
+*.mp4
+*.xlsx
+*.csv
+*.txt
+*.pdf
+node_modules/
+output_*

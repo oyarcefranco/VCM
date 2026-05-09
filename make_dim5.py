@@ -408,6 +408,35 @@ new_html = f"""{header_css}
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
+
+    // Función global para añadir botones de descarga PNG
+    document.addEventListener('DOMContentLoaded', () => {{
+      document.querySelectorAll('.chart-wrap').forEach(wrap => {{
+        const canvas = wrap.querySelector('canvas');
+        if (!canvas) return;
+        
+        const btn = document.createElement('button');
+        btn.className = 'download-btn';
+        btn.innerHTML = '⬇ PNG';
+        btn.title = 'Descargar gráfico como PNG';
+        btn.onclick = () => {{
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const ctx = tempCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          ctx.drawImage(canvas, 0, 0);
+          
+          const link = document.createElement('a');
+          link.download = canvas.id + '.png';
+          link.href = tempCanvas.toDataURL('image/png', 1.0);
+          link.click();
+        }};
+        wrap.appendChild(btn);
+      }});
+    }});
+
 </body>
 </html>
 """

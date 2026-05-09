@@ -323,6 +323,28 @@
       font-weight: 400;
       margin-left: 6px
     }
+
+    .download-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #555;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 10;
+      transition: all 0.2s;
+    }
+    .download-btn:hover {
+      background: #f0f0f0;
+      color: #1b365d;
+      border-color: #1b365d;
+    }
   </style>
 </head>
 
@@ -970,6 +992,35 @@
       });
     }
   </script>
+
+    // Función global para añadir botones de descarga PNG
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.chart-wrap').forEach(wrap => {
+        const canvas = wrap.querySelector('canvas');
+        if (!canvas) return;
+        
+        const btn = document.createElement('button');
+        btn.className = 'download-btn';
+        btn.innerHTML = '⬇ PNG';
+        btn.title = 'Descargar gráfico como PNG';
+        btn.onclick = () => {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const ctx = tempCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          ctx.drawImage(canvas, 0, 0);
+          
+          const link = document.createElement('a');
+          link.download = canvas.id + '.png';
+          link.href = tempCanvas.toDataURL('image/png', 1.0);
+          link.click();
+        };
+        wrap.appendChild(btn);
+      });
+    });
+
 </body>
 
 </html>
