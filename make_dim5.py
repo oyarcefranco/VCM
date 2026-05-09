@@ -60,6 +60,7 @@ new_html = f"""{header_css}
       <div class="year-filter" id="yf-dim5"></div>
       <div class="item-controls" id="ctrl-dim5"></div>
       <div class="item-chips" id="chips-dim5"></div>
+      <div id="avail-dim5" class="avail-note" style="display: none; margin-bottom: 20px;"></div>
       <div class="chart-wrap"><canvas id="chart-dim5"></canvas></div>
     </div>
   </div>
@@ -213,9 +214,30 @@ new_html = f"""{header_css}
     function renderChart() {{
       if (chartDim5) chartDim5.destroy();
       const canvas = document.getElementById('chart-dim5');
+      const availEl = document.getElementById('avail-dim5');
       
       const isAll = currentYear === 'Todos los años';
       const indexAxis = 'y';
+
+      if (!isAll) {{
+          // Availability check
+          const allItemsLabels = [...new Set(DIM5_ITEMS.map(i => i.label))];
+          const yearItems = DIM5_ITEMS.filter(item => {{
+              const dataPool = DATA[item.source];
+              return dataPool.some(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+          }});
+          const yearItemLabels = new Set(yearItems.map(i => i.label));
+          const missing = allItemsLabels.filter(l => !yearItemLabels.has(l));
+          
+          if (missing.length > 0) {{
+              availEl.innerHTML = '<strong>No disponible en ' + currentYear + ':</strong> ' + missing.join(', ');
+              availEl.style.display = 'inline-block';
+          }} else {{
+              availEl.style.display = 'none';
+          }}
+      }} else {{
+          availEl.style.display = 'none';
+      }}
 
       // Deduplicate labels and apply active filter
       const uniqueItems = [];
@@ -258,25 +280,25 @@ new_html = f"""{header_css}
                   }};
               }});
           }} else {{
-              setChartHeight(canvas, Math.max(labels.length * 55, 250));
-              const data = uniqueItems.map(item => {{
-                  let val = null;
-                  if (item.source === 'indicadores') {{
-                      const m = DATA.indicadores.find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
-                      if (m) val = m['Resultado (%)'] * 100;
-                  }} else {{
-                      const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
-                      if (m) val = m['Top_2_Box (%)'] * 100;
-                  }}
-                  return val;
-              }});
-              datasets = [{{
-                  data: data,
-                  backgroundColor: labels.map((_, i) => COLORS[i % COLORS.length]),
-                  borderRadius: 6,
-                  barThickness: 22
-              }}];
-          }}
+            setChartHeight(canvas, Math.max(labels.length * 55, 250));
+            const data = uniqueItems.map(item => {{
+                let val = null;
+                if (item.source === 'indicadores') {{
+                    const m = DATA.indicadores.find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+                    if (m) val = m['Resultado (%)'] * 100;
+                }} else {{
+                    const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+                    if (m) val = m['Top_2_Box (%)'] * 100;
+                }}
+                return val;
+            }});
+            datasets = [{{
+                data: data,
+                backgroundColor: YEAR_COLORS[currentYear],
+                borderRadius: 6,
+                barThickness: 22
+            }}];
+        }}
           
           chartDim5 = new Chart(canvas, {{
               type: 'bar',

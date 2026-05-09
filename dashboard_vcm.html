@@ -385,10 +385,10 @@
     <!-- Navigation -->
     <div class="nav">
       <button class="nav-btn active" onclick="showSection('imp')">Importancia Aspectos</button>
-      <button class="nav-btn" onclick="showSection('hab')">Habilidades</button>
+      <button class="nav-btn" onclick="showSection('hab')">Desarrollo habilidades</button>
       <button class="nav-btn" onclick="showSection('ind')">Indicadores Clave</button>
       <button class="nav-btn" onclick="showSection('val')">Valores Sebastianos</button>
-      <button class="nav-btn" onclick="showSection('trend')">Evolución Temporal</button>
+      <button class="nav-btn" onclick="showSection('trend')">Evolución</button>
     </div>
     <!-- Sections -->
     <div id="sec-imp" class="section">
@@ -432,7 +432,7 @@
       <div class="chart-wrap"><canvas id="chart-val"></canvas></div>
     </div>
     <div id="sec-trend" class="section hidden">
-      <div class="section-title">Evolución Temporal (2021-2025)</div>
+      <div class="section-title">Evolución</div>
       <div class="section-sub">Tendencia de los principales indicadores a lo largo de los 5 años</div>
       <div class="trend-grid">
         <div class="chart-wrap"><canvas id="chart-trend1"></canvas></div>
@@ -726,10 +726,12 @@
         options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Top 4 Aspectos Formativos (T2B %)', color: '#333333', font: { size: 18 } }, legend: { labels: { color: '#666666', font: { size: 14 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } } } }
       });
       const indNames = ['Significancia en Formación (T2B)', 'Expectativas Cumplidas (T2B)', 'Recomendaría a compañeros (% Sí)'];
+      const ds3Colors = ['#8c7a6b', '#5c9d38', '#e84393']; // Marrón, Oliva, Magenta fuerte
       const ds3 = indNames.map((h, i) => ({
-        label: h, borderColor: COLORS[i + 8], backgroundColor: COLORS[i + 8] + '33',
+        label: h, borderColor: ds3Colors[i], backgroundColor: ds3Colors[i] + '33',
         data: years.map(y => { const m = DATA.indicadores.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Resultado (%)'] * 100) : null }),
-        tension: .3, spanGaps: true, pointRadius: 5
+        tension: .3, spanGaps: true, pointRadius: 5,
+        borderWidth: i === 2 ? 4 : 2 // Hacemos la línea de Recomendación más gruesa
       }));
       charts.trend3 = new Chart(document.getElementById('chart-trend3'), {
         type: 'line', data: { labels: years, datasets: ds3 },
@@ -738,7 +740,7 @@
       const partData = [{ y: 2021, n: 911 }, { y: 2022, n: 2422 }, { y: 2023, n: 1953 }, { y: 2024, n: 3970 }, { y: 2025, n: 4629 }];
       charts.trend4 = new Chart(document.getElementById('chart-trend4'), {
         type: 'bar', data: { labels: years, datasets: [{ label: 'Estudiantes encuestados', data: partData.map(d => d.n), backgroundColor: years.map(y => YEAR_COLORS[y]), borderRadius: 8 }] },
-        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Participación por Año', color: '#333333', font: { size: 18 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } } } }
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Estudiantes encuestados por año', color: '#333333', font: { size: 18 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } } } }
       });
     }
   </script>
