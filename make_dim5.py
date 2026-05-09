@@ -34,6 +34,8 @@ new_html = f"""{header_css}
       </div>
       <div class="section-sub">Métricas vinculadas al desarrollo de competencias, habilidades y percepción de impacto profesional.</div>
       <div class="year-filter" id="yf-dim5"></div>
+      <div class="item-controls" id="ctrl-dim5"></div>
+      <div class="item-chips" id="chips-dim5"></div>
       <div class="chart-wrap"><canvas id="chart-dim5"></canvas></div>
     </div>
   </div>
@@ -78,6 +80,19 @@ new_html = f"""{header_css}
 
     let currentYear = 'Todos los años';
     let viewMode = 't2b'; // 't2b' or 'likert'
+    let activeItems = new Set();
+
+    function getUniqueItems() {{
+        const unique = [];
+        const seen = new Set();
+        DIM5_ITEMS.forEach(item => {{
+            if(!seen.has(item.label)) {{
+                seen.add(item.label);
+                unique.push(item.label);
+            }}
+        }});
+        return unique;
+    }}
 
     function init() {{
       const years = [2021, 2022, 2023, 2024, 2025];
@@ -107,6 +122,50 @@ new_html = f"""{header_css}
         yf.appendChild(b);
       }});
 
+      activeItems = new Set(getUniqueItems());
+      
+      const ctrl = document.getElementById('ctrl-dim5');
+      ctrl.innerHTML = '<button onclick="toggleAll(true)">✓ Todos</button>'
+        + '<button onclick="toggleAll(false)">✕ Ninguno</button>'
+        + '<span class="item-count" id="count-dim5"></span>';
+
+      buildChips();
+      renderChart();
+    }}
+
+    function buildChips() {{
+      const container = document.getElementById('chips-dim5');
+      container.innerHTML = '';
+      const items = getUniqueItems();
+      items.forEach(item => {{
+        const chip = document.createElement('span');
+        chip.className = 'item-chip' + (activeItems.has(item) ? '' : ' off');
+        chip.textContent = item;
+        chip.onclick = () => {{
+          if (activeItems.has(item)) activeItems.delete(item);
+          else activeItems.add(item);
+          chip.classList.toggle('off');
+          updateCount();
+          renderChart();
+        }};
+        container.appendChild(chip);
+      }});
+      updateCount();
+    }}
+
+    function updateCount() {{
+      const total = getUniqueItems().length;
+      document.getElementById('count-dim5').textContent = activeItems.size + ' de ' + total + ' seleccionados';
+    }}
+
+    function toggleAll(on) {{
+      const items = getUniqueItems();
+      if (on) items.forEach(i => activeItems.add(i));
+      else activeItems.clear();
+      document.querySelectorAll('#chips-dim5 .item-chip').forEach(c => {{
+        if (on) c.classList.remove('off'); else c.classList.add('off');
+      }});
+      updateCount();
       renderChart();
     }}
 
@@ -134,11 +193,11 @@ new_html = f"""{header_css}
       const isAll = currentYear === 'Todos los años';
       const indexAxis = 'y';
 
-      // Deduplicate labels (e.g. 26 and 31 are the same label)
+      // Deduplicate labels and apply active filter
       const uniqueItems = [];
       const seen = new Set();
       DIM5_ITEMS.forEach(item => {{
-          if(!seen.has(item.label)) {{
+          if(!seen.has(item.label) && activeItems.has(item.label)) {{
               seen.add(item.label);
               uniqueItems.push(item);
           }}
