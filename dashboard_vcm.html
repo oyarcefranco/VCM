@@ -411,6 +411,9 @@
         <strong>Significancia:</strong> Nivel de impacto en formación. <strong>Expectativas:</strong> Cumplimiento de las expectativas iniciales. <strong>Recomendación:</strong> Intención de sugerir la experiencia.
       </div>
       <div class="year-filter" id="yf-ind"></div>
+      <div class="item-controls" id="ctrl-ind"></div>
+      <div class="item-chips" id="chips-ind"></div>
+      <div id="avail-ind" class="avail-note" style="display: none;"></div>
       <div class="chart-wrap"><canvas id="chart-ind"></canvas></div>
     </div>
     <div id="sec-val" class="section hidden">
@@ -562,22 +565,28 @@
       redrawChart(key);
     }
 
-    function redrawChart(key) {
-      const st = sectionState[key];
+    function redrawChart(sec) {
+      const st = sectionState[sec];
       const { rawData, labelField, valueField, selectedYear } = st;
       const years = [...new Set(rawData.map(r => r['Año']))].sort();
 
-      if (charts[key]) charts[key].destroy();
-      const canvas = document.getElementById('chart-' + key);
-      const availEl = document.getElementById('avail-' + key);
+      if (charts[sec]) charts[sec].destroy();
+      const canvas = document.getElementById('chart-' + sec);
+      const availEl = document.getElementById('avail-' + sec);
+      
+      let filtered = [];
+      if (selectedYear !== null) {
+          filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
+          if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
+      } else {
+          filtered = [...st.activeItems];
+      }
 
-      const isSingleItem = st.activeItems.size === 1;
+      const isSingleItem = (selectedYear !== null && filtered.length === 1) || (selectedYear === null && st.activeItems.size === 1);
+      setChartHeight(canvas, isSingleItem ? 400 : Math.max(filtered.length * (selectedYear === null ? 100 : 50), 250));
       const indexAxis = isSingleItem ? 'x' : 'y';
 
       if (selectedYear !== null) {
-        // SINGLE YEAR
-        let filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
-        if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
         const labels = filtered.map(r => r[labelField]);
         const values = filtered.map(r => r[valueField] * 100);
 
