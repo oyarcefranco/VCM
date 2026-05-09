@@ -1009,19 +1009,24 @@
 
 
 
+  
+
+
   <script>
     // Función global para añadir botones de descarga PNG
-    (function () {
+    (function() {
       const initDownloadButtons = () => {
         document.querySelectorAll('.chart-wrap').forEach(wrap => {
           const canvas = wrap.querySelector('canvas');
           if (!canvas || wrap.querySelector('.download-btn')) return;
-
+          
           const btn = document.createElement('button');
           btn.className = 'download-btn';
           btn.innerHTML = '⬇ PNG';
           btn.title = 'Descargar gráfico como PNG';
-          btn.onclick = () => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -1029,7 +1034,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             ctx.drawImage(canvas, 0, 0);
-
+            
             const link = document.createElement('a');
             link.download = (canvas.id || 'grafico') + '.png';
             link.href = tempCanvas.toDataURL('image/png', 1.0);
@@ -1044,9 +1049,9 @@
       } else {
         initDownloadButtons();
       }
-
-      // También intentar después de un pequeño retraso por si los gráficos se cargan dinámicamente
-      setTimeout(initDownloadButtons, 1500);
+      
+      // Intentos periódicos para asegurar que aparezca en gráficos cargados dinámicamente
+      setInterval(initDownloadButtons, 2000);
     })();
   </script>
 

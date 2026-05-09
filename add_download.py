@@ -38,7 +38,9 @@ js_addition_raw = """
           btn.className = 'download-btn';
           btn.innerHTML = '⬇ PNG';
           btn.title = 'Descargar gráfico como PNG';
-          btn.onclick = () => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -62,8 +64,8 @@ js_addition_raw = """
         initDownloadButtons();
       }
       
-      // También intentar después de un pequeño retraso por si los gráficos se cargan dinámicamente
-      setTimeout(initDownloadButtons, 1500);
+      // Intentos periódicos para asegurar que aparezca en gráficos cargados dinámicamente
+      setInterval(initDownloadButtons, 2000);
     })();
   </script>
 """
@@ -74,17 +76,16 @@ for file in files:
     with open(file, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Remove previous script block if exists
+    # 1. Clean up OLD scripts
     content = re.sub(r'<script>\s*// Función global para añadir botones de descarga PNG.*?</script>', '', content, flags=re.DOTALL)
-    # Also remove the one without script tags if it's still there
     content = content.replace("// Función global para añadir botones de descarga PNG", "")
-
-    # Add CSS if not present
+    
+    # 2. Add CSS if missing
     if ".download-btn {" not in content:
         if "</style>" in content:
             content = content.replace("</style>", css_addition + "</style>")
 
-    # Add JS
+    # 3. Add JS
     js_to_add = js_addition_raw
     if file == 'make_dim5.py':
         js_to_add = js_to_add.replace("{", "{{").replace("}", "}}")
@@ -95,4 +96,4 @@ for file in files:
     with open(file, 'w', encoding='utf-8') as f:
         f.write(content)
 
-print("Applied robust download button fix")
+print("Synchronized download buttons and CSS across all files")

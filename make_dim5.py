@@ -11,6 +11,30 @@ if not data_match:
 data_json = data_match.group(0)
 
 header_css = content.split('</head>')[0]
+if ".download-btn" not in header_css:
+    header_css = header_css.replace("</style>", """
+    .download-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #555;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      transition: all 0.2s;
+    }
+    .download-btn:hover {
+      background: #f0f0f0;
+      color: #1b365d;
+      border-color: #1b365d;
+    }
+</style>""")
 
 new_html = f"""{header_css}
 </head>
@@ -413,6 +437,9 @@ new_html = f"""{header_css}
   
 
 
+  
+
+
   <script>
     // Función global para añadir botones de descarga PNG
     (function() {{
@@ -425,7 +452,9 @@ new_html = f"""{header_css}
           btn.className = 'download-btn';
           btn.innerHTML = '⬇ PNG';
           btn.title = 'Descargar gráfico como PNG';
-          btn.onclick = () => {{
+          btn.onclick = (e) => {{
+            e.preventDefault();
+            e.stopPropagation();
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
@@ -449,8 +478,8 @@ new_html = f"""{header_css}
         initDownloadButtons();
       }}
       
-      // También intentar después de un pequeño retraso por si los gráficos se cargan dinámicamente
-      setTimeout(initDownloadButtons, 1500);
+      // Intentos periódicos para asegurar que aparezca en gráficos cargados dinámicamente
+      setInterval(initDownloadButtons, 2000);
     }})();
   </script>
 
