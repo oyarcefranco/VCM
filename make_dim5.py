@@ -40,14 +40,15 @@ new_html = f"""{header_css}
 </head>
 <body>
   <div class="header-top">
-    <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <img src="logo_uss.png" alt="Logo USS" style="height: 40px; object-fit: contain;" onerror="this.style.display='none'">
+      <img src="logo_vcm.png" alt="Logo VcM" style="height: 40px; object-fit: contain;" onerror="this.style.display='none'">
       <h1>Universidad San Sebastián</h1>
       <a href="dashboard_vcm.html" style="background: #1b365d; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">⬅ Volver al Resumen</a>
     </div>
-    <div class="logo">Dimensión 5: Resultados Formativos</div>
   </div>
   <div class="header-nav">
-    <div class="subtitle">Evaluación de Resultados en Estudiantes</div>
+    <div class="subtitle">Resultados formativos estudiantes — Modelo de Evaluación VcM: Dimensión 5</div>
     <div>2021 — 2025</div>
   </div>
   <div class="container">
@@ -56,7 +57,7 @@ new_html = f"""{header_css}
         <span>Indicadores de Dimensión 5</span>
         <button id="view-toggle" class="year-btn active" style="font-size: 14px;" onclick="toggleView()">Ver: Top-2-Box (%) / % Sí</button>
       </div>
-      <div class="section-sub">Métricas vinculadas al desarrollo de competencias, habilidades y percepción de impacto profesional.</div>
+      <div class="section-sub">Esta dimensión evalúa los resultados formativos percibidos por los estudiantes a partir de su participación en iniciativas y experiencias de Vinculación con el Medio, considerando el desarrollo de competencias disciplinares, habilidades transversales, capacidades socioemocionales y comprensión del rol profesional en relación con el entorno.<br><strong>Métricas:</strong> Top-2-Box (%) para indicadores Likert y % Sí para indicadores dicotómicos.</div>
       <div class="year-filter" id="yf-dim5"></div>
       <div class="item-controls" id="ctrl-dim5"></div>
       <div class="item-chips" id="chips-dim5"></div>
@@ -276,7 +277,8 @@ new_html = f"""{header_css}
                       data: data,
                       backgroundColor: YEAR_COLORS[y],
                       borderRadius: 6,
-                      barThickness: 16
+                      barThickness: labels.length === 1 ? undefined : 16,
+                      maxBarThickness: labels.length === 1 ? 80 : undefined
                   }};
               }});
           }} else {{
@@ -296,7 +298,8 @@ new_html = f"""{header_css}
                 data: data,
                 backgroundColor: YEAR_COLORS[currentYear],
                 borderRadius: 6,
-                barThickness: 22
+                barThickness: labels.length === 1 ? undefined : 22,
+                maxBarThickness: labels.length === 1 ? 80 : undefined
             }}];
         }}
           
@@ -307,11 +310,15 @@ new_html = f"""{header_css}
                   indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                   plugins: {{
                       legend: {{ display: isAll, position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'circle', font: {{ size: 15 }} }} }},
-                      title: {{ display: true, text: 'Indicadores Dimensión 5 (' + currentYear + ') - Top-2-Box / % Sí', font: {{ size: 18 }} }},
+                      title: {{ display: true, text: (labels.length === 1 ? labels[0] + ' — ' : 'Indicadores Dimensión 5 — ') + currentYear + (labels.length > 1 ? ' (Top-2-Box / % Sí)' : ''), font: {{ size: labels.length === 1 ? 15 : 18 }} }},
                       datalabels: {{
                           color: '#fff',
                           font: {{ weight: 'bold', size: 14 }},
-                          formatter: (value) => value ? (value.toFixed(2) + '%').replace('.', ',') : ''
+                          formatter: (value, context) => {{
+                              if (!value) return '';
+                              const yr = isAll ? context.dataset.label : currentYear;
+                              return yr + ': ' + (value.toFixed(2) + '%').replace('.', ',');
+                          }}
                       }},
                       tooltip: {{ 
                           titleFont: {{ size: 16 }},
@@ -331,7 +338,7 @@ new_html = f"""{header_css}
           // Filter out items that are from "indicadores" because they do not have Likert distributions
           const likertItems = uniqueItems.filter(i => i.source === 'importancia' || i.source === 'habilidades');
           labels = likertItems.map(item => item.label);
-          const likertLabels = ['Nota 1 / Nada', 'Nota 2 / Poco', 'Nota 3 / Medianamente', 'Nota 4 / Importante o Fortalecida', 'Nota 5 / Muy importante o fortalecida'];
+          const likertLabels = ['1 - Nada', '2 - Poco', '3 - Medianamente', '4 - Importante / Fortalecida', '5 - Muy importante / Muy fortalecida'];
           
           if (isAll) {{
               setChartHeight(canvas, Math.max(labels.length * 150, 450));
@@ -349,7 +356,8 @@ new_html = f"""{header_css}
                               return m ? (m[`% ${{level}}`] * 100) : 0;
                           }}),
                           backgroundColor: hexToRgba(YEAR_COLORS[y], opacities[level-1]),
-                          barThickness: 16
+                          barThickness: labels.length === 1 ? undefined : 16,
+                          maxBarThickness: labels.length === 1 ? 80 : undefined
                       }});
                   }});
               }});
@@ -378,7 +386,7 @@ new_html = f"""{header_css}
                                   filter: function(item, chart) {{ return item.datasetIndex < 5; }}
                               }} 
                           }},
-                          title: {{ display: true, text: 'Distribución Likert (' + currentYear + ') - Indicadores con Escala', font: {{ size: 18 }} }},
+                          title: {{ display: true, text: 'Distribución Likert — ' + (labels.length === 1 ? labels[0] + ' — ' : '') + currentYear, font: {{ size: labels.length === 1 ? 15 : 18 }} }},
                           datalabels: {{
                               color: '#fff',
                               font: {{ weight: 'bold', size: 13 }},
@@ -415,7 +423,8 @@ new_html = f"""{header_css}
                           return m ? (m[`% ${{level}}`] * 100) : 0;
                       }}),
                       backgroundColor: hexToRgba(YEAR_COLORS[currentYear], opacities[level-1]),
-                      barThickness: 22
+                      barThickness: labels.length === 1 ? undefined : 22,
+                      maxBarThickness: labels.length === 1 ? 80 : undefined
                   }}
               }});
 
@@ -426,7 +435,7 @@ new_html = f"""{header_css}
                       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                       plugins: {{
                           legend: {{ position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: {{ size: 15 }} }} }},
-                          title: {{ display: true, text: 'Distribución Likert (' + currentYear + ') - Indicadores con Escala', font: {{ size: 18 }} }},
+                          title: {{ display: true, text: 'Distribución Likert — ' + (labels.length === 1 ? labels[0] + ' — ' : '') + currentYear, font: {{ size: labels.length === 1 ? 15 : 18 }} }},
                           datalabels: {{
                               color: '#fff',
                               font: {{ weight: 'bold', size: 14 }},
