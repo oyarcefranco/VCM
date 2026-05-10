@@ -1,4 +1,4 @@
-import re
+import re, json
 
 with open("dashboard_vcm_dim5.html", "r", encoding="utf-8") as f:
     content = f.read()
@@ -9,6 +9,29 @@ if not data_match:
     exit(1)
 
 data_json = data_match.group(0)
+
+# Inject Likert distribution for Significancia en Formación into indicadores
+try:
+    import pandas as pd
+    raw_data_str = data_json[5:-1]  # Remove 'DATA=' and ';'
+    dim5_data = json.loads(raw_data_str)
+    
+    df_sig = pd.read_excel('base_homologada_final.xlsx', sheet_name='Significancia_Formacion')
+    year_col = [c for c in df_sig.columns if c.startswith('A')][0]
+    
+    for ind_record in dim5_data.get('indicadores', []):
+        if ind_record.get('Indicador') == 'Significancia en Formación (T2B)':
+            year = ind_record['Año']
+            subset = df_sig[df_sig[year_col] == year]['Q01_Significancia'].dropna()
+            n = len(subset)
+            if n > 0:
+                for level in [1, 2, 3, 4, 5]:
+                    ind_record[f'% {level}'] = round(float((subset == level).sum() / n), 6)
+    
+    data_json = 'DATA=' + json.dumps(dim5_data, ensure_ascii=False) + ';'
+    print("Injected Likert data for Significancia en Formación")
+except Exception as e:
+    print(f"Warning: Could not inject Likert data: {e}")
 
 header_css = content.split('</head>')[0]
 if ".download-btn" not in header_css:
@@ -57,12 +80,13 @@ new_html = f"""{header_css}
         <span>Indicadores de Dimensión 5</span>
         <button id="view-toggle" class="year-btn active" style="font-size: 14px;" onclick="toggleView()">Ver: Top-2-Box (%) / % Sí</button>
       </div>
-      <div class="section-sub">Esta dimensión evalúa los resultados formativos percibidos por los estudiantes a partir de su participación en iniciativas y experiencias de Vinculación con el Medio, considerando el desarrollo de competencias disciplinares, habilidades transversales, capacidades socioemocionales y comprensión del rol profesional en relación con el entorno.<br><strong>Métricas:</strong> Top-2-Box (%) para indicadores Likert y % Sí para indicadores dicotómicos.</div>
+      <div class="section-sub">Esta dimensión evalúa los resultados formativos percibidos por los estudiantes a partir de su participación en iniciativas y experiencias de Vinculación con el Medio, considerando el desarrollo de competencias disciplinares, habilidades transversales, capacidades socioemocionales y comprensión del rol profesional en relación con el entorno.<br><strong>Métricas:</strong> Top-2-Box (%) para indicadores Likert y % Sí para indicadores dicotómicos.<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100. <strong>% Sí</strong> = n respuestas "Sí" / N total × 100.<br><span style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número de respuestas validadas (n).</span></div>
       <div class="year-filter" id="yf-dim5"></div>
       <div class="item-controls" id="ctrl-dim5"></div>
       <div class="item-chips" id="chips-dim5"></div>
       <div id="avail-dim5" class="avail-note" style="display: none; margin-bottom: 20px;"></div>
       <div class="chart-wrap"><canvas id="chart-dim5"></canvas></div>
+      <div id="interp-dim5" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>
     </div>
   </div>
   <script>
@@ -103,6 +127,25 @@ new_html = f"""{header_css}
       {{ id: 38, label: 'Incrementar redes de contactos', source: 'importancia' }},
       {{ id: 39, label: 'Fortalecer vocación profesional', source: 'importancia' }}
     ];
+
+    const DIM5_OFFICIAL_TITLES = {{
+      'Significancia en Formación (T2B)': '% de estudiantes que declaran que la participación en iniciativas VcM fue significativa o muy significativa para su formación profesional',
+      'Permitió conocer campo laboral (% Sí)': '% de estudiantes que consideran que el proyecto les permitió conocer su campo laboral',
+      'Trabajar con otras carreras': '% de estudiantes que participan en proyectos multidisciplinarios',
+      'Trabajo en equipo / Colaboración': '% de estudiantes que fortalecen colaboración a partir de iniciativas VcM',
+      'Competencia disciplinar': '% de estudiantes que fortalecen su competencia disciplinar a partir de iniciativas VcM',
+      'Manejo de información (toma de decisiones)': '% de estudiantes que fortalecen manejo de información a partir de iniciativas VcM',
+      'Prolijidad / Atención al detalle': '% de estudiantes que fortalecen prolijidad disciplinar a partir de iniciativas VcM',
+      'Empatía': '% de estudiantes que fortalecen empatía a partir de iniciativas VcM',
+      'Comunicación efectiva': '% de estudiantes que fortalecen comunicación a partir de iniciativas VcM',
+      'Adaptación y flexibilidad': '% de estudiantes que fortalecen adaptación y flexibilidad a partir de iniciativas VcM',
+      'Resolución de problemas': '% de estudiantes que fortalecen resolución de problemas',
+      'Ciudadanía responsable': '% de estudiantes que fortalecen habilidades de ciudadanía',
+      'Conocer la realidad (problemas/desafíos)': '% de estudiantes que valoran la experiencia para conocer la realidad social',
+      'Aportar desde el rol profesional': '% de estudiantes que comprenden su aporte profesional',
+      'Incrementar redes de contactos': '% de estudiantes que incrementan redes de contacto',
+      'Fortalecer vocación profesional': '% de estudiantes que fortalecen su vocación profesional'
+    }};
 
     let currentYear = 'Todos los años';
     let viewMode = 't2b'; // 't2b' or 'likert'
@@ -216,9 +259,10 @@ new_html = f"""{header_css}
       if (chartDim5) chartDim5.destroy();
       const canvas = document.getElementById('chart-dim5');
       const availEl = document.getElementById('avail-dim5');
+      const interpEl = document.getElementById('interp-dim5');
+      if (interpEl) interpEl.innerHTML = '';
       
       const isAll = currentYear === 'Todos los años';
-      const indexAxis = 'y';
 
       if (!isAll) {{
           // Availability check
@@ -250,18 +294,26 @@ new_html = f"""{header_css}
           }}
       }});
 
+      // Filter out items with no data for selected year
+      const filteredItems = isAll ? uniqueItems : uniqueItems.filter(item => {{
+          const dataPool = DATA[item.source];
+          return dataPool.some(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+      }});
+
+      const isSingleItem = filteredItems.length === 1;
       let datasets = [];
       let labels = [];
 
       if (viewMode === 't2b') {{
-          // TOP-2-BOX VIEW (Simple bars)
-          labels = uniqueItems.map(item => item.label);
+          // TOP-2-BOX VIEW
+          labels = filteredItems.map(item => item.label);
+          const indexAxis = isSingleItem ? 'x' : 'y';
           
           if (isAll) {{
-              setChartHeight(canvas, Math.max(labels.length * 150, 450));
+              setChartHeight(canvas, isSingleItem ? 400 : Math.max(labels.length * 150, 450));
               const years = [2021, 2022, 2023, 2024, 2025];
               datasets = years.map(y => {{
-                  const data = uniqueItems.map(item => {{
+                  const data = filteredItems.map(item => {{
                       let val = null;
                       if (item.source === 'indicadores') {{
                           const m = DATA.indicadores.find(r => r['Año'] === y && r['Indicador'] === item.label);
@@ -277,20 +329,21 @@ new_html = f"""{header_css}
                       data: data,
                       backgroundColor: YEAR_COLORS[y],
                       borderRadius: 6,
-                      barThickness: labels.length === 1 ? undefined : 16,
-                      maxBarThickness: labels.length === 1 ? 80 : undefined
+                      barThickness: isSingleItem ? undefined : 16,
+                      maxBarThickness: isSingleItem ? 80 : undefined
                   }};
               }});
           }} else {{
-            setChartHeight(canvas, Math.max(labels.length * 55, 250));
-            const data = uniqueItems.map(item => {{
+            setChartHeight(canvas, isSingleItem ? 400 : Math.max(labels.length * 55, 250));
+            const data = filteredItems.map(item => {{
                 let val = null;
+                let nResp = null;
                 if (item.source === 'indicadores') {{
                     const m = DATA.indicadores.find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
-                    if (m) val = m['Resultado (%)'] * 100;
+                    if (m) {{ val = m['Resultado (%)'] * 100; nResp = m['N_Respuestas']; }}
                 }} else {{
                     const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
-                    if (m) val = m['Top_2_Box (%)'] * 100;
+                    if (m) {{ val = m['Top_2_Box (%)'] * 100; nResp = m['N_Respuestas']; }}
                 }}
                 return val;
             }});
@@ -298,19 +351,45 @@ new_html = f"""{header_css}
                 data: data,
                 backgroundColor: YEAR_COLORS[currentYear],
                 borderRadius: 6,
-                barThickness: labels.length === 1 ? undefined : 22,
-                maxBarThickness: labels.length === 1 ? 80 : undefined
+                barThickness: isSingleItem ? undefined : 22,
+                maxBarThickness: isSingleItem ? 80 : undefined
             }}];
+
+            // Show N + interpretation for single item
+            if (isSingleItem && interpEl) {{
+                const item = filteredItems[0];
+                let nResp = null;
+                let val = null;
+                if (item.source === 'indicadores') {{
+                    const m = DATA.indicadores.find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+                    if (m) {{ val = m['Resultado (%)'] * 100; nResp = m['N_Respuestas']; }}
+                }} else {{
+                    const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+                    if (m) {{ val = m['Top_2_Box (%)'] * 100; nResp = m['N_Respuestas']; }}
+                }}
+                let html = '<strong>Respuestas validadas:</strong> n = ' + (nResp || '—').toLocaleString('es-CL') + ' (' + currentYear + ')';
+                if (val !== null) {{
+                    const pct = val.toFixed(2).replace('.', ',');
+                    let trend = val >= 85 ? 'alto' : val >= 70 ? 'moderado' : 'bajo';
+                    html += '<br><strong>Interpretación:</strong> El ' + pct + '% de los estudiantes encuestados en ' + currentYear + ' presenta un nivel <strong>' + trend + '</strong> en este indicador.';
+                }}
+                interpEl.innerHTML = html;
+            }}
         }}
+
+          // Use official title for single item
+          const chartTitle = isSingleItem
+              ? (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]) + ' — ' + currentYear
+              : (labels.length === 1 ? labels[0] + ' — ' : 'Indicadores Dimensión 5 — ') + currentYear + (labels.length > 1 ? ' (Top-2-Box / % Sí)' : '');
           
           chartDim5 = new Chart(canvas, {{
               type: 'bar',
               data: {{ labels: labels, datasets: datasets }},
               options: {{
-                  indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                  indexAxis: isSingleItem ? 'x' : 'y', responsive: true, maintainAspectRatio: false,
                   plugins: {{
                       legend: {{ display: isAll, position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'circle', font: {{ size: 15 }} }} }},
-                      title: {{ display: true, text: (labels.length === 1 ? labels[0] + ' — ' : 'Indicadores Dimensión 5 — ') + currentYear + (labels.length > 1 ? ' (Top-2-Box / % Sí)' : ''), font: {{ size: labels.length === 1 ? 15 : 18 }} }},
+                      title: {{ display: true, text: chartTitle, font: {{ size: isSingleItem ? 14 : 18 }} }},
                       datalabels: {{
                           color: '#fff',
                           font: {{ weight: 'bold', size: 14 }},
@@ -326,19 +405,22 @@ new_html = f"""{header_css}
                           callbacks: {{ label: c => (isAll ? c.dataset.label + ': ' : '') + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') }} 
                       }}
                   }},
-                  scales: {{
+                  scales: isSingleItem ? {{
+                      x: {{ grid: {{ color: '#eaeaea' }}, ticks: {{ color: '#666666', font: {{ size: 15 }} }} }},
+                      y: {{ min: 0, max: 100, grid: {{ display: true }}, ticks: {{ color: '#333333', font: {{ size: 15 }}, callback: v => v + '%' }} }}
+                  }} : {{
                       x: {{ min: 0, max: 100, grid: {{ color: '#eaeaea' }}, ticks: {{ color: '#666666', font: {{ size: 15 }}, callback: v => v + '%' }} }},
-                      y: {{ grid: {{ display: false }}, ticks: {{ color: '#333333', font: {{ size: 15 }} }} }}
+                      y: {{ type: 'category', grid: {{ display: false }}, ticks: {{ color: '#333333', font: {{ size: 15 }} }} }}
                   }}
               }}
           }});
 
       }} else {{
           // LIKERT VIEW (Stacked bars)
-          // Filter out items that are from "indicadores" because they do not have Likert distributions
-          const likertItems = uniqueItems.filter(i => i.source === 'importancia' || i.source === 'habilidades');
+          // Include indicadores source items too if they have Likert data
+          const likertItems = filteredItems.filter(i => i.source === 'importancia' || i.source === 'habilidades' || (i.source === 'indicadores' && DATA.indicadores.some(r => r['Indicador'] === i.label && r['% 1'] !== undefined)));
           labels = likertItems.map(item => item.label);
-          const likertLabels = ['1 - Nada', '2 - Poco', '3 - Medianamente', '4 - Importante / Fortalecida', '5 - Muy importante / Muy fortalecida'];
+          const likertLabels = ['Nada', 'Poco', 'Medianamente', 'Importante / Fortalecida', 'Muy importante / Muy fortalecida'];
           
           if (isAll) {{
               setChartHeight(canvas, Math.max(labels.length * 150, 450));
@@ -428,6 +510,19 @@ new_html = f"""{header_css}
                   }}
               }});
 
+              // Show N for single item in Likert view (no interpretation)
+              if (likertItems.length === 1 && interpEl) {{
+                  const item = likertItems[0];
+                  const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
+                  if (m) {{
+                      interpEl.innerHTML = '<strong>Respuestas validadas:</strong> n = ' + (m['N_Respuestas'] || '—').toLocaleString('es-CL') + ' (' + currentYear + ')';
+                  }}
+              }}
+
+              const likertTitle = labels.length === 1 
+                  ? 'Distribución Likert: ' + (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]) + ' — ' + currentYear
+                  : 'Distribución Likert — ' + currentYear;
+
               chartDim5 = new Chart(canvas, {{
                   type: 'bar',
                   data: {{ labels, datasets }},
@@ -435,7 +530,7 @@ new_html = f"""{header_css}
                       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                       plugins: {{
                           legend: {{ position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: {{ size: 15 }} }} }},
-                          title: {{ display: true, text: 'Distribución Likert — ' + (labels.length === 1 ? labels[0] + ' — ' : '') + currentYear, font: {{ size: labels.length === 1 ? 15 : 18 }} }},
+                          title: {{ display: true, text: likertTitle, font: {{ size: labels.length === 1 ? 14 : 18 }} }},
                           datalabels: {{
                               color: '#fff',
                               font: {{ weight: 'bold', size: 14 }},
