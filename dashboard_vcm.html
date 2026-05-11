@@ -336,10 +336,11 @@
       font-weight: 700;
       color: #555;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       z-index: 10;
       transition: all 0.2s;
     }
+
     .download-btn:hover {
       background: #f0f0f0;
       color: #1b365d;
@@ -347,23 +348,30 @@
     }
   </style>
 </head>
+
 <body>
   <div class="header-top">
     <div style="display: flex; align-items: center; gap: 16px;">
-      <img src="logo_uss.png" alt="Logo USS" style="height: 40px; object-fit: contain;" onerror="this.style.display='none'">
-      <img src="logo_vcm.png" alt="Logo VcM" style="height: 40px; object-fit: contain;" onerror="this.style.display='none'">
+      <img src="logo_uss.png" alt="Logo USS" style="height: 40px; object-fit: contain;"
+        onerror="this.style.display='none'">
+      <img src="logo_vcm.png" alt="Logo VcM" style="height: 40px; object-fit: contain;"
+        onerror="this.style.display='none'">
       <h1>Universidad San Sebastián</h1>
     </div>
     <div style="display:flex; gap:10px;">
-      <a href="dashboard_vcm_detalle.html" style="background: #1b365d; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Ver Detalle</a>
+      <a href="dashboard_vcm_detalle.html"
+        style="background: #1b365d; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Ver
+        Detalle</a>
     </div>
   </div>
   <div class="header-nav">
-    <div class="subtitle">Reporte de resultados de la encuesta de Estudiantes participantes en Proyectos Colaborativos 2021-2025</div>
+    <div class="subtitle">Reporte de resultados de la Encuesta de estudiantes participantes en Proyectos Colaborativos
+      2021-2025</div>
     <div>2021 — 2025</div>
   </div>
   <div class="container">
-    <div style="font-size: 16px; font-weight: 600; color: #475569; margin-bottom: 12px;">Cifras globales destacadas (2021-2025)</div>
+    <div style="font-size: 16px; font-weight: 600; color: #475569; margin-bottom: 12px;">Cifras globales destacadas
+      (2021-2025)</div>
     <!-- KPIs -->
     <div class="kpi-row">
       <div class="kpi-card">
@@ -372,15 +380,21 @@
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi2">95,0%</div>
-        <div class="label">Índice de Recomendación <span title="Pregunta: ¿Recomendarías a tus compañeros participar en un Proyecto Colaborativo VcM?" style="cursor:help">ℹ️</span><br>Global</div>
+        <div class="label">Índice de Recomendación <span
+            title="Pregunta: ¿Recomendarías a tus compañeros participar en un Proyecto Colaborativo VcM?"
+            style="cursor:help">ℹ️</span><br>Global</div>
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi3">86,7%</div>
-        <div class="label">Impacto Positivo en <span title="Promedio de estudiantes que calificaron la experiencia como Significativa o Muy Significativa (T2B)" style="cursor:help">ℹ️</span><br>Formación (T2B)</div>
+        <div class="label">Impacto Positivo en <span
+            title="Promedio de estudiantes que calificaron la experiencia como Significativa o Muy Significativa (T2B)"
+            style="cursor:help">ℹ️</span><br>Formación (T2B)</div>
       </div>
       <div class="kpi-card">
         <div class="value" id="kpi4">76,1%</div>
-        <div class="label">Expectativas Cumplidas <span title="Promedio de estudiantes que indicaron que se cumplieron en alto grado sus expectativas (T2B)" style="cursor:help">ℹ️</span><br>(T2B)</div>
+        <div class="label">Expectativas Cumplidas <span
+            title="Promedio de estudiantes que indicaron que se cumplieron en alto grado sus expectativas (T2B)"
+            style="cursor:help">ℹ️</span><br>(T2B)</div>
       </div>
     </div>
     <!-- Navigation -->
@@ -390,78 +404,121 @@
       <button class="nav-btn" onclick="showSection('ind')">Indicadores Clave</button>
       <button class="nav-btn" onclick="showSection('val')">Valores Sebastianos</button>
       <button class="nav-btn" onclick="showSection('trend')">Evolución</button>
-      <a href="dashboard_vcm_dim5.html" class="nav-btn" style="background: #e84393; color: #fff; text-decoration: none;">Modelo de Evaluación VcM: Dimensión 5</a>
+      <a href="dashboard_vcm_dim5.html" class="nav-btn"
+        style="background: #e84393; color: #fff; text-decoration: none;">Modelo de Evaluación VcM: Dimensión 5</a>
     </div>
     <!-- Sections -->
     <div id="sec-imp" class="section">
       <div class="section-title">Importancia de Aspectos Formativos</div>
-      <div class="section-sub">Pregunta: "Evalúa el grado de importancia que tuvo participar en el Proyecto Colaborativo para el logro de los siguientes aspectos:" · Métrica: % Top-2-Box (Nota 4: Importante + Nota 5: Muy importante).<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100.<br>Los aspectos evaluados reflejan la valoración que los estudiantes otorgan a distintas dimensiones de su experiencia formativa en el marco de los Proyectos Colaborativos de Vinculación con el Medio.<br><span style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número de respuestas validadas (n).</span></div>
+      <div class="section-sub">Pregunta: "Evalúa el grado de importancia que tuvo participar en el Proyecto Colaborativo
+        para el logro de los siguientes aspectos:" · Métrica: % Top-2-Box (Nota 4: Importante + Nota 5: Muy
+        importante).<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100.<br>Los aspectos evaluados
+        reflejan la valoración que los estudiantes otorgan a distintas dimensiones de su experiencia formativa en el
+        marco de los Proyectos Colaborativos de Vinculación con el Medio.<br><span
+          style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un año específico para ver la
+          interpretación descriptiva detallada y el número de respuestas validadas (n).</span></div>
       <div class="year-filter" id="yf-imp"></div>
       <div style="font-size: 13px; color: #64748B; font-weight: 600; margin-bottom: 6px;">Aspectos evaluados:</div>
       <div class="item-controls" id="ctrl-imp"></div>
       <div class="item-chips" id="chips-imp"></div>
       <div id="avail-imp" class="avail-note"></div>
       <div class="chart-wrap"><canvas id="chart-imp"></canvas></div>
-      <div id="interp-imp" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>
+      <div id="interp-imp"
+        style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;">
+      </div>
     </div>
     <div id="sec-hab" class="section hidden">
       <div class="section-title">Desarrollo de Habilidades</div>
-      <div class="section-sub">Pregunta: "En base a tu experiencia en el Proyecto Colaborativo, evalúa el grado de fortalecimiento de las siguientes habilidades:" · Métrica: % Top-2-Box (Nota 4: Fortalecida + Nota 5: Muy fortalecida).<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100.<br>Permite observar en qué medida los estudiantes perciben que las iniciativas de VcM contribuyen al fortalecimiento de habilidades transversales relevantes para su formación profesional.<br><span style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número de respuestas validadas (n).</span></div>
+      <div class="section-sub">Pregunta: "En base a tu experiencia en el Proyecto Colaborativo, evalúa el grado de
+        fortalecimiento de las siguientes habilidades:" · Métrica: % Top-2-Box (Nota 4: Fortalecida + Nota 5: Muy
+        fortalecida).<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100.<br>Permite observar en
+        qué medida los estudiantes perciben que las iniciativas de VcM contribuyen al fortalecimiento de habilidades
+        transversales relevantes para su formación profesional.<br><span style="color:#2980b9; font-style:italic;">💡
+          Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número
+          de respuestas validadas (n).</span></div>
       <div class="year-filter" id="yf-hab"></div>
       <div style="font-size: 13px; color: #64748B; font-weight: 600; margin-bottom: 6px;">Habilidades evaluadas:</div>
       <div class="item-controls" id="ctrl-hab"></div>
       <div class="item-chips" id="chips-hab"></div>
       <div id="avail-hab" class="avail-note"></div>
       <div class="chart-wrap"><canvas id="chart-hab"></canvas></div>
-      <div id="interp-hab" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>
+      <div id="interp-hab"
+        style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;">
+      </div>
     </div>
     <div id="sec-ind" class="section hidden">
       <div class="section-title">Indicadores Clave por Año</div>
-      <div class="section-sub">Métricas generales de percepción del impacto de los Proyectos Colaborativos de Vinculación con el Medio.<br>
-        <strong>Significancia:</strong> Nivel de impacto en formación profesional (T2B: Significativa + Muy significativa). <strong>Expectativas:</strong> Cumplimiento de las expectativas iniciales del estudiante (T2B). <strong>Recomendación:</strong> Recomendar la experiencia a otros compañeros (% Sí). <strong>Campo Laboral:</strong> Permitió conocer el campo laboral (% Sí).<br>
-        <strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100. Los indicadores con (% Sí) corresponden a preguntas dicotómicas.<br><span style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número de respuestas validadas (n).</span>
+      <div class="section-sub">Métricas generales de percepción del impacto de los Proyectos Colaborativos de
+        Vinculación con el Medio.<br>
+        <strong>Significancia:</strong> Nivel de impacto en formación profesional (T2B: Significativa + Muy
+        significativa). <strong>Expectativas:</strong> Cumplimiento de las expectativas iniciales del estudiante (T2B).
+        <strong>Recomendación:</strong> Recomendar la experiencia a otros compañeros (% Sí). <strong>Campo
+          Laboral:</strong> Permitió conocer el campo laboral (% Sí).<br>
+        <strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100. Los indicadores con (% Sí) corresponden a
+        preguntas dicotómicas.<br><span style="color:#2980b9; font-style:italic;">💡 Seleccione un solo indicador y un
+          año específico para ver la interpretación descriptiva detallada y el número de respuestas validadas
+          (n).</span>
       </div>
       <div class="year-filter" id="yf-ind"></div>
       <div class="item-controls" id="ctrl-ind"></div>
       <div class="item-chips" id="chips-ind"></div>
       <div id="avail-ind" class="avail-note" style="display: none;"></div>
       <div class="chart-wrap"><canvas id="chart-ind"></canvas></div>
-      <div id="interp-ind" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>
+      <div id="interp-ind"
+        style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;">
+      </div>
     </div>
     <div id="sec-val" class="section hidden">
       <div class="section-title">Valores Sebastianos — Ranking de Menciones</div>
-      <div class="section-sub">Pregunta: "Identifica qué Valores Sebastianos estuvieron presentes en el proyecto" · Selección múltiple · Métrica: % de estudiantes que lo marcó.<br>
-        <strong>Nota:</strong> Esta pregunta solo fue respondida por los estudiantes que previamente declararon que el proyecto colaborativo les ayudó a fortalecer los Valores Sebastianos (ver indicador "Fortalecer los valores sebastianos en mi persona" en la sección Importancia de Aspectos Formativos). Por lo tanto, los porcentajes se calculan sobre el universo de estudiantes que respondieron afirmativamente a esa pregunta.</div>
+      <div class="section-sub">Pregunta: "Identifica qué Valores Sebastianos estuvieron presentes en el proyecto" ·
+        Selección múltiple · Métrica: % de estudiantes que lo marcó.<br>
+        <strong>Nota:</strong> Esta pregunta solo fue respondida por los estudiantes que previamente declararon que el
+        proyecto colaborativo les ayudó a fortalecer los Valores Sebastianos (ver indicador "Fortalecer los valores
+        sebastianos en mi persona" en la sección Importancia de Aspectos Formativos). Por lo tanto, los porcentajes se
+        calculan sobre el universo de estudiantes que respondieron afirmativamente a esa pregunta.
+      </div>
       <div class="year-filter" id="yf-val"></div>
       <div class="item-controls" id="ctrl-val"></div>
       <div class="item-chips" id="chips-val"></div>
       <div id="avail-val" class="avail-note"></div>
       <div class="chart-wrap"><canvas id="chart-val"></canvas></div>
-      <div id="interp-val" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>
+      <div id="interp-val"
+        style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;">
+      </div>
       <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #E2E8F0;">
-        <div class="section-title" style="font-size: 18px;">Indicador relacionado: Fortalecer los valores sebastianos en mi persona</div>
-        <div class="section-sub">Evolución del indicador IMP_04 (Top-2-Box) que condiciona la sección de Valores Sebastianos.</div>
+        <div class="section-title" style="font-size: 18px;">Indicador relacionado: Fortalecer los valores sebastianos en
+          mi persona</div>
+        <div class="section-sub">Evolución del indicador IMP_04 (Top-2-Box) que condiciona la sección de Valores
+          Sebastianos.</div>
         <div class="chart-wrap"><canvas id="chart-val-imp04"></canvas></div>
       </div>
     </div>
     <div id="sec-trend" class="section hidden">
       <div class="section-title">Evolución</div>
-      <div class="section-sub">Tendencia de los principales indicadores a lo largo de los 5 años de aplicación de la encuesta de estudiantes. Cada gráfico muestra la evolución de un grupo de preguntas vinculadas a la percepción formativa, habilidades y satisfacción de los estudiantes participantes en Proyectos Colaborativos de Vinculación con el Medio.</div>
+      <div class="section-sub">Tendencia de los principales indicadores a lo largo de los 5 años de aplicación de la
+        encuesta de estudiantes. Cada gráfico muestra la evolución de un grupo de preguntas vinculadas a la percepción
+        formativa, habilidades y satisfacción de los estudiantes participantes en Proyectos Colaborativos de Vinculación
+        con el Medio.</div>
       <div class="trend-grid">
         <div>
-          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Pregunta: "¿En qué grado se fortalecieron las siguientes habilidades?" (T2B: Fortalecida + Muy fortalecida)</div>
+          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Pregunta: "¿En qué grado se fortalecieron
+            las siguientes habilidades?" (T2B: Fortalecida + Muy fortalecida)</div>
           <div class="chart-wrap"><canvas id="chart-trend1"></canvas></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Pregunta: "Evalúa el grado de importancia que tuvo participar en el Proyecto Colaborativo para el logro de los siguientes aspectos" (T2B: Importante + Muy importante)</div>
+          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Pregunta: "Evalúa el grado de importancia
+            que tuvo participar en el Proyecto Colaborativo para el logro de los siguientes aspectos" (T2B: Importante +
+            Muy importante)</div>
           <div class="chart-wrap"><canvas id="chart-trend2"></canvas></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Indicadores: Significancia en formación (T2B), Expectativas cumplidas (T2B), Recomendaría a compañeros (% Sí)</div>
+          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Indicadores: Significancia en formación
+            (T2B), Expectativas cumplidas (T2B), Recomendaría a compañeros (% Sí)</div>
           <div class="chart-wrap"><canvas id="chart-trend3"></canvas></div>
         </div>
         <div>
-          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Total de estudiantes que respondieron la encuesta en cada período</div>
+          <div style="font-size: 12px; color: #64748B; margin-bottom: 8px;">Total de estudiantes que respondieron la
+            encuesta en cada período</div>
           <div class="chart-wrap"><canvas id="chart-trend4"></canvas></div>
         </div>
       </div>
@@ -571,7 +628,7 @@
           const vals = allData.map(r => r[valueField] * 100);
           const first = vals[0], last = vals[vals.length - 1];
           const trend = last > first + 2 ? 'creciente' : (last < first - 2 ? 'decreciente' : 'estable');
-          el.innerHTML = '<strong>Interpretación:</strong> El indicador \"' + fullName + '\" muestra una tendencia <strong>' + trend + '</strong> entre ' + allData[0]['Año'] + ' y ' + allData[allData.length-1]['Año'] + ', pasando de <strong>' + first.toFixed(1).replace('.', ',') + '%</strong> a <strong>' + last.toFixed(1).replace('.', ',') + '%</strong>.';
+          el.innerHTML = '<strong>Interpretación:</strong> El indicador \"' + fullName + '\" muestra una tendencia <strong>' + trend + '</strong> entre ' + allData[0]['Año'] + ' y ' + allData[allData.length - 1]['Año'] + ', pasando de <strong>' + first.toFixed(1).replace('.', ',') + '%</strong> a <strong>' + last.toFixed(1).replace('.', ',') + '%</strong>.';
         }
       } else {
         el.innerHTML = '<strong>Nota:</strong> Seleccione un solo indicador para ver la interpretación descriptiva detallada y el número de respuestas validadas.';
@@ -724,13 +781,13 @@
       if (charts[sec]) charts[sec].destroy();
       const canvas = document.getElementById('chart-' + sec);
       const availEl = document.getElementById('avail-' + sec);
-      
+
       let filtered = [];
       if (selectedYear !== null) {
-          filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
-          if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
+        filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
+        if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
       } else {
-          filtered = [...st.activeItems];
+        filtered = [...st.activeItems];
       }
 
       const isSingleItem = (selectedYear !== null && filtered.length === 1) || (selectedYear === null && st.activeItems.size === 1);
@@ -752,7 +809,7 @@
 
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(labels.length * 55, 250));
-        
+
         const barOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 50 } : { borderRadius: 4, borderSkipped: false, barThickness: 22 };
         charts[sec] = new Chart(canvas, {
           type: 'bar',
@@ -776,10 +833,10 @@
                 align: 'center',
                 formatter: (value) => isSingleItem ? (value.toFixed(2) + '%').replace('.', ',') : (selectedYear + ': ' + (value.toFixed(2) + '%').replace('.', ','))
               },
-              tooltip: { 
-                  titleFont: { size: 16 },
-                  bodyFont: { size: 16 },
-                  callbacks: { label: c => (c.raw.toFixed(2) + '%').replace('.', ',') } 
+              tooltip: {
+                titleFont: { size: 16 },
+                bodyFont: { size: 16 },
+                callbacks: { label: c => (c.raw.toFixed(2) + '%').replace('.', ',') }
               }
             },
             scales: {
@@ -831,10 +888,10 @@
             ...allBarOpts
           }));
         }
-        
+
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(items.length * 150, 450));
-        
+
         charts[sec] = new Chart(canvas, {
           type: 'bar',
           data: { labels: singleLabels, datasets: singleDatasets },
@@ -855,10 +912,10 @@
                   return yr + ': ' + (value.toFixed(1) + '%').replace('.', ',');
                 }
               },
-              tooltip: { 
-                  titleFont: { size: 16 },
-                  bodyFont: { size: 16 },
-                  callbacks: { label: c => isSingleItem ? (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : '') : c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') } 
+              tooltip: {
+                titleFont: { size: 16 },
+                bodyFont: { size: 16 },
+                callbacks: { label: c => isSingleItem ? (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : '') : c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') }
               }
             },
             scales: {
@@ -922,21 +979,21 @@
     }
   </script>
 
-    
-  
 
 
-  
+
+
+
 
 
   <script>
     // Función global para añadir botones de descarga PNG
-    (function() {
+    (function () {
       const initDownloadButtons = () => {
         document.querySelectorAll('.chart-wrap').forEach(wrap => {
           const canvas = wrap.querySelector('canvas');
           if (!canvas || wrap.querySelector('.download-btn')) return;
-          
+
           const btn = document.createElement('button');
           btn.className = 'download-btn';
           btn.innerHTML = '⬇ PNG';
@@ -951,7 +1008,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             ctx.drawImage(canvas, 0, 0);
-            
+
             const link = document.createElement('a');
             link.download = (canvas.id || 'grafico') + '.png';
             link.href = tempCanvas.toDataURL('image/png', 1.0);
@@ -966,7 +1023,7 @@
       } else {
         initDownloadButtons();
       }
-      
+
       // Intentos periódicos para asegurar que aparezca en gráficos cargados dinámicamente
       setInterval(initDownloadButtons, 2000);
     })();
