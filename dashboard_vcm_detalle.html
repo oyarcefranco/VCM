@@ -494,9 +494,20 @@
       buildTrends();
     }
 
-
     function setChartHeight(canvas, h) {
       canvas.parentElement.style.height = h + 'px';
+    }
+
+    function wrapTitle(text, maxLen) {
+      if (text.length <= maxLen) return text;
+      const words = text.split(' ');
+      const lines = []; let current = '';
+      words.forEach(w => {
+        if ((current + ' ' + w).trim().length > maxLen && current) { lines.push(current.trim()); current = w; }
+        else { current = current ? current + ' ' + w : w; }
+      });
+      if (current) lines.push(current.trim());
+      return lines;
     }
 
     function showSection(id) {
@@ -647,8 +658,8 @@
             label: likertLabels[level - 1],
             data: filtered.map(r => r[`% ${level}`] * 100),
             backgroundColor: hexToRgba(YEAR_COLORS[selectedYear], opacities[level - 1]),
-            barThickness: isSingleItem ? undefined : 18,
-            maxBarThickness: isSingleItem ? 80 : undefined
+            barThickness: isSingleItem ? undefined : 16,
+            maxBarThickness: isSingleItem ? 50 : undefined
           }
         });
 
@@ -664,6 +675,8 @@
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(labels.length * 55, 250));
 
+        const singleTitle = isSingleItem ? wrapTitle('Distribución Likert: ' + selectedYear + ' — ' + labels[0], 55) : 'Distribución Likert: ' + selectedYear;
+
         charts[key] = new Chart(canvas, {
           type: 'bar',
           data: { labels, datasets },
@@ -671,7 +684,7 @@
             indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: { size: 15 } } },
-              title: { display: true, text: 'Distribución Likert: ' + selectedYear + (isSingleItem ? ' — ' + labels[0] : ''), font: { size: isSingleItem ? 15 : 18 }, padding: { bottom: 16 } },
+              title: { display: true, text: singleTitle, font: { size: isSingleItem ? 18 : 18, weight: 'bold' }, padding: { bottom: 16 } },
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 14 },
@@ -730,7 +743,7 @@
               }),
               backgroundColor: hexToRgba(YEAR_COLORS[y], opacities[level - 1]),
               barThickness: isSingleItem ? undefined : 16,
-              maxBarThickness: isSingleItem ? 80 : undefined
+              maxBarThickness: isSingleItem ? 50 : undefined
             });
           });
         });
@@ -766,7 +779,7 @@
                   }
                 }
               },
-              title: { display: true, text: 'Distribución Likert: Todos los años' + (isSingleItem ? ' — ' + items[0] : ''), font: { size: isSingleItem ? 15 : 18 } },
+              title: { display: true, text: isSingleItem ? wrapTitle('Distribución Likert: Todos los años — ' + items[0], 55) : 'Distribución Likert: Todos los años', font: { size: 18, weight: 'bold' } },
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 13 },
@@ -866,7 +879,7 @@
             }),
             backgroundColor: hexToRgba(YEAR_COLORS[year], opacities[level - 1]),
             barThickness: yearLabels.length === 1 ? undefined : 20,
-            maxBarThickness: yearLabels.length === 1 ? 80 : undefined
+            maxBarThickness: yearLabels.length === 1 ? 50 : undefined
           });
         });
         // Sí/No for dichotomous
@@ -880,7 +893,7 @@
           }),
           backgroundColor: '#27ae60',
           barThickness: yearLabels.length === 1 ? undefined : 20,
-          maxBarThickness: yearLabels.length === 1 ? 80 : undefined
+          maxBarThickness: yearLabels.length === 1 ? 50 : undefined
         });
         datasets.push({
           label: 'No',
@@ -892,7 +905,7 @@
           }),
           backgroundColor: '#e74c3c',
           barThickness: yearLabels.length === 1 ? undefined : 20,
-          maxBarThickness: yearLabels.length === 1 ? 80 : undefined
+          maxBarThickness: yearLabels.length === 1 ? 50 : undefined
         });
 
         // Show N responses
@@ -1066,7 +1079,7 @@
             backgroundColor: YEAR_COLORS[y],
             borderRadius: 6,
             barThickness: items.length === 1 ? undefined : 16,
-            maxBarThickness: items.length === 1 ? 80 : undefined
+            maxBarThickness: items.length === 1 ? 50 : undefined
           };
         });
       } else {
@@ -1078,7 +1091,7 @@
         datasets = [{
           data: filtered.map(r => r['% de Estudiantes'] * 100),
           backgroundColor: YEAR_COLORS[year],
-          borderRadius: 6, barThickness: labels.length === 1 ? undefined : 22, maxBarThickness: labels.length === 1 ? 80 : undefined
+          borderRadius: 6, barThickness: labels.length === 1 ? undefined : 22, maxBarThickness: labels.length === 1 ? 50 : undefined
         }];
       }
 
@@ -1089,7 +1102,7 @@
           indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: isAll, position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 15 } } },
-            title: { display: true, text: (labels.length === 1 ? labels[0] : 'Valores Sebastianos') + ' — ' + year, font: { size: labels.length === 1 ? 15 : 18 } },
+            title: { display: true, text: labels.length === 1 ? wrapTitle(labels[0] + ' — ' + year, 55) : ('Valores Sebastianos — ' + year), font: { size: labels.length === 1 ? 18 : 18, weight: 'bold' } },
             datalabels: {
               color: '#fff',
               font: { weight: 'bold', size: 14 },

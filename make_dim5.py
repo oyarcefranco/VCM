@@ -255,6 +255,18 @@ new_html = f"""{header_css}
       canvas.parentElement.style.height = h + 'px';
     }}
 
+    function wrapTitle(text, maxLen) {{
+      if (text.length <= maxLen) return text;
+      const words = text.split(' ');
+      const lines = []; let current = '';
+      words.forEach(w => {{
+        if ((current + ' ' + w).trim().length > maxLen && current) {{ lines.push(current.trim()); current = w; }}
+        else {{ current = current ? current + ' ' + w : w; }}
+      }});
+      if (current) lines.push(current.trim());
+      return lines;
+    }}
+
     function renderChart() {{
       if (chartDim5) chartDim5.destroy();
       const canvas = document.getElementById('chart-dim5');
@@ -310,31 +322,64 @@ new_html = f"""{header_css}
           const indexAxis = isSingleItem ? 'x' : 'y';
           
           if (isAll) {{
-              setChartHeight(canvas, isSingleItem ? 400 : Math.max(labels.length * 150, 450));
-              const years = [2021, 2022, 2023, 2024, 2025];
-              datasets = years.map(y => {{
-                  const data = filteredItems.map(item => {{
-                      let val = null;
-                      if (item.source === 'indicadores') {{
-                          const m = DATA.indicadores.find(r => r['Año'] === y && r['Indicador'] === item.label);
-                          if (m) val = m['Resultado (%)'] * 100;
-                      }} else {{
-                          const m = DATA[item.source].find(r => r['Año'] === y && r['Indicador'] === item.label);
-                          if (m) val = m['Top_2_Box (%)'] * 100;
-                      }}
-                      return val;
-                  }});
-                  return {{
-                      label: y.toString(),
-                      data: data,
-                      backgroundColor: YEAR_COLORS[y],
-                      borderRadius: 6,
-                      barThickness: isSingleItem ? undefined : 16,
-                      maxBarThickness: isSingleItem ? 80 : undefined
-                  }};
-              }});
+              // For single item: filter out years with no data
+              if (isSingleItem) {{
+                const item = filteredItems[0];
+                const yearsWithData = [2021, 2022, 2023, 2024, 2025].filter(y => {{
+                  if (item.source === 'indicadores') {{
+                    return DATA.indicadores.some(r => r['Año'] === y && r['Indicador'] === item.label);
+                  }} else {{
+                    return DATA[item.source].some(r => r['Año'] === y && r['Indicador'] === item.label);
+                  }}
+                }});
+                labels = yearsWithData.map(y => y.toString());
+                setChartHeight(canvas, 400);
+                const data = yearsWithData.map(y => {{
+                  let val = null;
+                  if (item.source === 'indicadores') {{
+                    const m = DATA.indicadores.find(r => r['Año'] === y && r['Indicador'] === item.label);
+                    if (m) val = m['Resultado (%)'] * 100;
+                  }} else {{
+                    const m = DATA[item.source].find(r => r['Año'] === y && r['Indicador'] === item.label);
+                    if (m) val = m['Top_2_Box (%)'] * 100;
+                  }}
+                  return val;
+                }});
+                datasets = [{{
+                  data: data,
+                  backgroundColor: yearsWithData.map(y => YEAR_COLORS[y]),
+                  borderRadius: 6,
+                  maxBarThickness: 50
+                }}];
+              }} else {{
+                setChartHeight(canvas, Math.max(labels.length * 150, 450));
+                const years = [2021, 2022, 2023, 2024, 2025];
+                datasets = years.map(y => {{
+                    const data = filteredItems.map(item => {{
+                        let val = null;
+                        if (item.source === 'indicadores') {{
+                            const m = DATA.indicadores.find(r => r['Año'] === y && r['Indicador'] === item.label);
+                            if (m) val = m['Resultado (%)'] * 100;
+                        }} else {{
+                            const m = DATA[item.source].find(r => r['Año'] === y && r['Indicador'] === item.label);
+                            if (m) val = m['Top_2_Box (%)'] * 100;
+                        }}
+                        return val;
+                    }});
+                    return {{
+                        label: y.toString(),
+                        data: data,
+                        backgroundColor: YEAR_COLORS[y],
+                        borderRadius: 6,
+                        barThickness: 16
+                    }};
+                }});
+              }}
           }} else {{
             setChartHeight(canvas, isSingleItem ? 400 : Math.max(labels.length * 55, 250));
+            if (isSingleItem) {{
+              labels = [currentYear.toString()];
+            }}
             const data = filteredItems.map(item => {{
                 let val = null;
                 let nResp = null;
@@ -352,7 +397,7 @@ new_html = f"""{header_css}
                 backgroundColor: YEAR_COLORS[currentYear],
                 borderRadius: 6,
                 barThickness: isSingleItem ? undefined : 22,
-                maxBarThickness: isSingleItem ? 80 : undefined
+                maxBarThickness: isSingleItem ? 50 : undefined
             }}];
 
             // Show N + interpretation for single item
@@ -377,9 +422,8 @@ new_html = f"""{header_css}
             }}
         }}
 
-          // Use official title for single item
           const chartTitle = isSingleItem
-              ? (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]) + ' — ' + currentYear
+              ? wrapTitle((DIM5_OFFICIAL_TITLES[filteredItems[0].label] || filteredItems[0].label) + ' — ' + currentYear, 55)
               : (labels.length === 1 ? labels[0] + ' — ' : 'Indicadores Dimensión 5 — ') + currentYear + (labels.length > 1 ? ' (Top-2-Box / % Sí)' : '');
           
           chartDim5 = new Chart(canvas, {{
@@ -388,13 +432,14 @@ new_html = f"""{header_css}
               options: {{
                   indexAxis: isSingleItem ? 'x' : 'y', responsive: true, maintainAspectRatio: false,
                   plugins: {{
-                      legend: {{ display: isAll, position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'circle', font: {{ size: 15 }} }} }},
-                      title: {{ display: true, text: chartTitle, font: {{ size: isSingleItem ? 14 : 18 }} }},
+                      legend: {{ display: !isSingleItem && isAll, position: 'top', labels: {{ color: '#333333', usePointStyle: true, pointStyle: 'circle', font: {{ size: 15 }} }} }},
+                      title: {{ display: true, text: chartTitle, font: {{ size: isSingleItem ? 18 : 18, weight: 'bold' }} }},
                       datalabels: {{
                           color: '#fff',
                           font: {{ weight: 'bold', size: 14 }},
                           formatter: (value, context) => {{
                               if (!value) return '';
+                              if (isSingleItem) return (value.toFixed(2) + '%').replace('.', ',');
                               const yr = isAll ? context.dataset.label : currentYear;
                               return yr + ': ' + (value.toFixed(2) + '%').replace('.', ',');
                           }}
@@ -406,7 +451,7 @@ new_html = f"""{header_css}
                       }}
                   }},
                   scales: isSingleItem ? {{
-                      x: {{ grid: {{ color: '#eaeaea' }}, ticks: {{ color: '#666666', font: {{ size: 15 }} }} }},
+                      x: {{ grid: {{ color: '#eaeaea' }}, ticks: {{ color: '#333333', font: {{ size: 14, weight: 'bold' }} }} }},
                       y: {{ min: 0, max: 100, grid: {{ display: true }}, ticks: {{ color: '#333333', font: {{ size: 15 }}, callback: v => v + '%' }} }}
                   }} : {{
                       x: {{ min: 0, max: 100, grid: {{ color: '#eaeaea' }}, ticks: {{ color: '#666666', font: {{ size: 15 }}, callback: v => v + '%' }} }},

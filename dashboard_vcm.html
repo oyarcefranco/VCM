@@ -527,6 +527,18 @@
       'val': ''
     };
 
+    function wrapTitle(text, maxLen) {
+      if (text.length <= maxLen) return text;
+      const words = text.split(' ');
+      const lines = []; let current = '';
+      words.forEach(w => {
+        if ((current + ' ' + w).trim().length > maxLen && current) { lines.push(current.trim()); current = w; }
+        else { current = current ? current + ' ' + w : w; }
+      });
+      if (current) lines.push(current.trim());
+      return lines;
+    }
+
     function getDynamicTitle(sec, items, selectedYear) {
       const yearText = selectedYear ? selectedYear : 'Todos los años';
       if (items.length === 1) {
@@ -534,7 +546,7 @@
         const fullName = FULL_NAMES[name] || name;
         const prefix = SECTION_TITLE_PREFIX[sec] || '';
         const suffix = SECTION_METRIC_SUFFIX[sec] || '';
-        return prefix + fullName + suffix;
+        return wrapTitle(prefix + fullName + suffix, 60);
       }
       const sectionNames = { 'imp': 'Importancia Aspectos Formativos', 'hab': 'Desarrollo de Habilidades', 'ind': 'Indicadores Clave', 'val': 'Valores Sebastianos' };
       return (sectionNames[sec] || 'Resultados') + ' — ' + yearText;
@@ -741,11 +753,12 @@
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(labels.length * 55, 250));
         
-        const barOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 80 } : { borderRadius: 4, borderSkipped: false, barThickness: 22 };
+        const barOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 50 } : { borderRadius: 4, borderSkipped: false, barThickness: 22 };
         charts[sec] = new Chart(canvas, {
           type: 'bar',
           data: {
-            labels, datasets: [{
+            labels: isSingleItem ? [selectedYear] : labels,
+            datasets: [{
               data: values,
               backgroundColor: YEAR_COLORS[selectedYear],
               ...barOpts
@@ -755,13 +768,13 @@
             indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
               legend: { display: false },
-              title: { display: true, text: getDynamicTitle(sec, labels, selectedYear), font: { size: isSingleItem ? 15 : 18 }, padding: { bottom: 16 } },
+              title: { display: true, text: getDynamicTitle(sec, labels, selectedYear), font: { size: isSingleItem ? 18 : 18, weight: 'bold' }, padding: { bottom: 16 } },
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: 14 },
                 rotation: indexAxis === 'x' ? -90 : 0,
                 align: 'center',
-                formatter: (value) => (selectedYear + ': ' + (value.toFixed(2) + '%').replace('.', ','))
+                formatter: (value) => isSingleItem ? (value.toFixed(2) + '%').replace('.', ',') : (selectedYear + ': ' + (value.toFixed(2) + '%').replace('.', ','))
               },
               tooltip: { 
                   titleFont: { size: 16 },
@@ -771,7 +784,7 @@
             },
             scales: {
               [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
-              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: isSingleItem ? 14 : 15, weight: isSingleItem ? 'bold' : undefined } } }
             }
           }
         });
@@ -787,28 +800,49 @@
             return avgB - avgA;
           });
         }
-        const allBarOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 80 } : { borderRadius: 3, borderSkipped: false, barThickness: 16 };
-        const datasets = years.map(y => ({
-          label: y.toString(),
-          data: items.map(item => {
+        const allBarOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 50 } : { borderRadius: 3, borderSkipped: false, barThickness: 16 };
+
+        // For single item: filter out years with no data and use years as X-axis labels
+        let singleLabels, singleDatasets;
+        if (isSingleItem) {
+          const item = items[0];
+          const yearsWithData = years.filter(y => {
             const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
-            return m ? (m[valueField] * 100) : null;
-          }),
-          backgroundColor: YEAR_COLORS[y],
-          ...allBarOpts
-        }));
+            return m && m[valueField] !== null && m[valueField] !== undefined;
+          });
+          singleLabels = yearsWithData.map(y => y.toString());
+          singleDatasets = [{
+            data: yearsWithData.map(y => {
+              const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+              return m ? (m[valueField] * 100) : null;
+            }),
+            backgroundColor: yearsWithData.map(y => YEAR_COLORS[y]),
+            ...allBarOpts
+          }];
+        } else {
+          singleLabels = items;
+          singleDatasets = years.map(y => ({
+            label: y.toString(),
+            data: items.map(item => {
+              const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+              return m ? (m[valueField] * 100) : null;
+            }),
+            backgroundColor: YEAR_COLORS[y],
+            ...allBarOpts
+          }));
+        }
         
         if (isSingleItem) setChartHeight(canvas, 400);
         else setChartHeight(canvas, Math.max(items.length * 150, 450));
         
         charts[sec] = new Chart(canvas, {
           type: 'bar',
-          data: { labels: items, datasets },
+          data: { labels: singleLabels, datasets: singleDatasets },
           options: {
             indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 15 } } },
-              title: { display: true, text: getDynamicTitle(sec, items, null), font: { size: 18 } },
+              legend: { display: !isSingleItem, position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 15 } } },
+              title: { display: true, text: getDynamicTitle(sec, items, null), font: { size: isSingleItem ? 18 : 18, weight: 'bold' } },
               datalabels: {
                 color: '#fff',
                 font: { weight: 'bold', size: isSingleItem ? 14 : 11 },
@@ -816,6 +850,7 @@
                 align: 'center',
                 formatter: (value, context) => {
                   if (!value) return '';
+                  if (isSingleItem) return (value.toFixed(2) + '%').replace('.', ',');
                   const yr = context.dataset.label;
                   return yr + ': ' + (value.toFixed(1) + '%').replace('.', ',');
                 }
@@ -823,12 +858,12 @@
               tooltip: { 
                   titleFont: { size: 16 },
                   bodyFont: { size: 16 },
-                  callbacks: { label: c => c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') } 
+                  callbacks: { label: c => isSingleItem ? (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : '') : c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') } 
               }
             },
             scales: {
               [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
-              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: isSingleItem ? 14 : 15, weight: isSingleItem ? 'bold' : undefined } } }
             }
           }
         });
