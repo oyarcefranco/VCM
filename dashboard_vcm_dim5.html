@@ -367,10 +367,9 @@
 <body>
   <div class="header-top">
     <div style="display: flex; align-items: center; gap: 16px;">
-      <img src="logo_uss.png" alt="Logo USS" style="height: 40px; object-fit: contain;"
+      <img src="logo_color_vcm3.png" alt="Logo USS" style="height: 40px; object-fit: contain;"
         onerror="this.style.display='none'">
-      <img src="logo_vcm.png" alt="Logo VcM" style="height: 40px; object-fit: contain;"
-        onerror="this.style.display='none'">
+      <img src="logo.png" alt="Logo VcM" style="height: 40px; object-fit: contain;" onerror="this.style.display='none'">
       <h1>Universidad San Sebastián</h1>
       <a href="dashboard_vcm.html"
         style="background: #1b365d; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">⬅
@@ -395,7 +394,8 @@
         Sí para indicadores dicotómicos.<br><strong>Fórmula T2B</strong> = (n Nota 4 + n Nota 5) / N total × 100.
         <strong>% Sí</strong> = n respuestas "Sí" / N total × 100.<br><span style="color:#2980b9; font-style:italic;">💡
           Seleccione un solo indicador y un año específico para ver la interpretación descriptiva detallada y el número
-          de respuestas validadas (n).</span></div>
+          de respuestas validadas (n).</span>
+      </div>
       <div class="year-filter" id="yf-dim5"></div>
       <div class="item-controls" id="ctrl-dim5"></div>
       <div class="item-chips" id="chips-dim5"></div>
@@ -785,32 +785,55 @@
         const likertLabels = ['Nada', 'Poco', 'Medianamente', 'Importante / Fortalecida', 'Muy importante / Muy fortalecida'];
 
         if (isAll) {
-          setChartHeight(canvas, Math.max(labels.length * 150, 450));
           const years = [2021, 2022, 2023, 2024, 2025];
           const opacities = [0.2, 0.4, 0.6, 0.8, 1.0];
+          let finalLabels = labels;
+          const isSingleLikert = labels.length === 1;
 
-          years.forEach(y => {
+          if (isSingleLikert) {
+            const item = likertItems[0];
+            const validYears = years.filter(y => DATA[item.source].some(r => r['Año'] === y && r['Indicador'] === item.label));
+            finalLabels = validYears.map(String);
+
             [1, 2, 3, 4, 5].forEach(level => {
               datasets.push({
                 label: likertLabels[level - 1],
-                datasetYear: y,
-                stack: y.toString(),
-                data: likertItems.map(item => {
+                datasetYear: item.label,
+                data: validYears.map(y => {
                   const m = DATA[item.source].find(r => r['Año'] === y && r['Indicador'] === item.label);
                   return m ? (m[`% ${level}`] * 100) : 0;
                 }),
-                backgroundColor: hexToRgba(YEAR_COLORS[y], opacities[level - 1]),
-                barThickness: labels.length === 1 ? undefined : 16,
-                maxBarThickness: labels.length === 1 ? 80 : undefined
+                backgroundColor: validYears.map(y => hexToRgba(YEAR_COLORS[y], opacities[level - 1])),
+                barThickness: undefined,
+                maxBarThickness: 50
               });
             });
-          });
+            setChartHeight(canvas, 400);
+          } else {
+            years.forEach(y => {
+              [1, 2, 3, 4, 5].forEach(level => {
+                datasets.push({
+                  label: likertLabels[level - 1],
+                  datasetYear: y,
+                  stack: y.toString(),
+                  data: likertItems.map(item => {
+                    const m = DATA[item.source].find(r => r['Año'] === y && r['Indicador'] === item.label);
+                    return m ? (m[`% ${level}`] * 100) : 0;
+                  }),
+                  backgroundColor: hexToRgba(YEAR_COLORS[y], opacities[level - 1]),
+                  barThickness: 16,
+                  maxBarThickness: undefined
+                });
+              });
+            });
+            setChartHeight(canvas, Math.max(labels.length * 150, 450));
+          }
 
           chartDim5 = new Chart(canvas, {
             type: 'bar',
-            data: { labels: labels, datasets },
+            data: { labels: finalLabels, datasets },
             options: {
-              indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+              indexAxis: isSingleLikert ? 'x' : 'y', responsive: true, maintainAspectRatio: false,
               plugins: {
                 legend: {
                   position: 'top',
@@ -830,7 +853,7 @@
                     filter: function (item, chart) { return item.datasetIndex < 5; }
                   }
                 },
-                title: { display: true, text: 'Distribución Likert — ' + (labels.length === 1 ? labels[0] + ' — ' : '') + currentYear, font: { size: labels.length === 1 ? 15 : 18 } },
+                title: { display: true, text: isSingleLikert ? wrapTitle('Distribución Likert: Todos los años — ' + (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]), 55) : 'Distribución Likert — Todos los años', font: { size: 18, weight: 'bold' } },
                 datalabels: {
                   color: '#fff',
                   font: { weight: 'bold', size: 13 },
@@ -844,20 +867,21 @@
                   titleFont: { size: 16 },
                   bodyFont: { size: 16 },
                   callbacks: {
-                    title: (context) => context[0].label + ' (' + context[0].dataset.datasetYear + ')',
+                    title: (context) => isSingleLikert ? context[0].dataset.datasetYear + ' (' + context[0].label + ')' : context[0].label + ' (' + context[0].dataset.datasetYear + ')',
                     label: c => likertLabels[(c.datasetIndex % 5)] + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato')
                   }
                 }
               },
               scales: {
-                x: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
-                y: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
+                [isSingleLikert ? 'y' : 'x']: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
+                [isSingleLikert ? 'x' : 'y']: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
               }
             }
           });
 
         } else {
-          setChartHeight(canvas, Math.max(labels.length * 55, 250));
+          const isSingleLikert = labels.length === 1;
+          setChartHeight(canvas, isSingleLikert ? 400 : Math.max(labels.length * 55, 250));
           const opacities = [0.2, 0.4, 0.6, 0.8, 1.0];
           datasets = [1, 2, 3, 4, 5].map(level => {
             return {
@@ -867,13 +891,13 @@
                 return m ? (m[`% ${level}`] * 100) : 0;
               }),
               backgroundColor: hexToRgba(YEAR_COLORS[currentYear], opacities[level - 1]),
-              barThickness: labels.length === 1 ? undefined : 22,
-              maxBarThickness: labels.length === 1 ? 80 : undefined
+              barThickness: isSingleLikert ? undefined : 22,
+              maxBarThickness: isSingleLikert ? 50 : undefined
             }
           });
 
           // Show N for single item in Likert view (no interpretation)
-          if (likertItems.length === 1 && interpEl) {
+          if (isSingleLikert && interpEl) {
             const item = likertItems[0];
             const m = DATA[item.source].find(r => r['Año'] === currentYear && r['Indicador'] === item.label);
             if (m) {
@@ -881,21 +905,23 @@
             }
           }
 
-          const likertTitle = labels.length === 1
-            ? 'Distribución Likert: ' + (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]) + ' — ' + currentYear
+          const likertTitle = isSingleLikert
+            ? wrapTitle('Distribución Likert: ' + (DIM5_OFFICIAL_TITLES[labels[0]] || labels[0]) + ' — ' + currentYear, 55)
             : 'Distribución Likert — ' + currentYear;
 
           chartDim5 = new Chart(canvas, {
             type: 'bar',
             data: { labels, datasets },
             options: {
-              indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+              indexAxis: isSingleLikert ? 'x' : 'y', responsive: true, maintainAspectRatio: false,
               plugins: {
                 legend: { position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'rectRounded', font: { size: 15 } } },
-                title: { display: true, text: likertTitle, font: { size: labels.length === 1 ? 14 : 18 } },
+                title: { display: true, text: likertTitle, font: { size: 18, weight: 'bold' } },
                 datalabels: {
                   color: '#fff',
                   font: { weight: 'bold', size: 14 },
+                  rotation: isSingleLikert ? -90 : 0,
+                  align: 'center',
                   formatter: (value, context) => {
                     const datasetIndex = context.datasetIndex; // 0 to 4
                     if (datasetIndex >= 3 && value >= 4.0) return (value.toFixed(2) + '%').replace('.', ',');
@@ -909,8 +935,8 @@
                 }
               },
               scales: {
-                x: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
-                y: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
+                [isSingleLikert ? 'y' : 'x']: { stacked: true, min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
+                [isSingleLikert ? 'x' : 'y']: { stacked: true, grid: { display: false }, ticks: { color: '#333333', font: { size: 15 } } }
               }
             }
           });
