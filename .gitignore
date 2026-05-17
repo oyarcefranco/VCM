@@ -3,7 +3,4 @@
 *.csv
 *.txt
 *.pdf
-node_modules/
-output_*
-
-/docs
+*.docx
