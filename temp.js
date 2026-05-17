@@ -1,0 +1,653 @@
+
+    const COLORS = ['#1e4c9a', '#7d4199', '#009a74', '#f37021', '#f3a81a', '#4c3c5c', '#2a82c9', '#e64d3d', '#8c7a6b', '#5c9d38'];
+    const YEAR_COLORS = { 2021: '#8e44ad', 2022: '#f39c12', 2023: '#e84393', 2024: '#2980b9', 2025: '#16a085' };
+    let charts = {};
+    Chart.register(ChartDataLabels);
+    let DATA;
+    let sectionState = {};
+
+    DATA = { "kpis": [{ "Métrica": "Total Estudiantes Impactados (2021-2025)", "Valor": 13885 }, { "Métrica": "Índice de Recomendación Global", "Valor": "95.0%" }, { "Métrica": "Impacto Positivo en Formación (T2B Global)", "Valor": "86.7%" }, { "Métrica": "Expectativas Cumplidas (T2B Global)", "Valor": "76.1%" }], "importancia": [{ "Año": 2021, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 906, "Top_2_Box (%)": 0.8995584988962473, "Promedio (1-5)": 4.52317880794702 }, { "Año": 2022, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9042113955408753, "Promedio (1-5)": 4.494632535094963 }, { "Año": 2023, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 1944, "Top_2_Box (%)": 0.9372427983539094, "Promedio (1-5)": 4.633744855967078 }, { "Año": 2024, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 3670, "Top_2_Box (%)": 0.8681198910081744, "Promedio (1-5)": 4.370299727520436 }, { "Año": 2025, "Código": "IMP_01", "Indicador": "Aplicar lo aprendido en clases", "N_Respuestas": 4386, "Top_2_Box (%)": 0.8974008207934336, "Promedio (1-5)": 4.511627906976744 }, { "Año": 2021, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 897, "Top_2_Box (%)": 0.8974358974358975, "Promedio (1-5)": 4.51505016722408 }, { "Año": 2022, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9042113955408753, "Promedio (1-5)": 4.511147811725847 }, { "Año": 2023, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 1929, "Top_2_Box (%)": 0.9455676516329704, "Promedio (1-5)": 4.683773976153447 }, { "Año": 2024, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 3676, "Top_2_Box (%)": 0.9004352557127312, "Promedio (1-5)": 4.493199129488574 }, { "Año": 2025, "Código": "IMP_02", "Indicador": "Conocer la realidad (problemas/desafíos)", "N_Respuestas": 4382, "Top_2_Box (%)": 0.9148790506617983, "Promedio (1-5)": 4.608854404381561 }, { "Año": 2022, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8905862923203963, "Promedio (1-5)": 4.499587118084228 }, { "Año": 2023, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 1923, "Top_2_Box (%)": 0.9339573582943318, "Promedio (1-5)": 4.656786271450858 }, { "Año": 2024, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 3666, "Top_2_Box (%)": 0.8881614839061648, "Promedio (1-5)": 4.480087288597927 }, { "Año": 2025, "Código": "IMP_03", "Indicador": "Fortalecer vocación profesional", "N_Respuestas": 4381, "Top_2_Box (%)": 0.9018488929468158, "Promedio (1-5)": 4.557635243095183 }, { "Año": 2021, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 901, "Top_2_Box (%)": 0.7691453940066593, "Promedio (1-5)": 4.133185349611542 }, { "Año": 2022, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 2350, "Top_2_Box (%)": 0.7195744680851064, "Promedio (1-5)": 3.99063829787234 }, { "Año": 2023, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 1909, "Top_2_Box (%)": 0.8009429020429544, "Promedio (1-5)": 4.270822420115244 }, { "Año": 2024, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 3650, "Top_2_Box (%)": 0.7602739726027398, "Promedio (1-5)": 4.086301369863014 }, { "Año": 2025, "Código": "IMP_04", "Indicador": "Fortalecer valores sebastianos", "N_Respuestas": 4367, "Top_2_Box (%)": 0.823219601557133, "Promedio (1-5)": 4.318296313258529 }, { "Año": 2021, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 899, "Top_2_Box (%)": 0.9098998887652948, "Promedio (1-5)": 4.586206896551724 }, { "Año": 2022, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 2422, "Top_2_Box (%)": 0.9946325350949629, "Promedio (1-5)": 4.031379025598679 }, { "Año": 2023, "Código": "IMP_05", "Indicador": "Potenciar desempeño futuro", "N_Respuestas": 1937, "Top_2_Box (%)": 0.9514713474445018, "Promedio (1-5)": 4.699535363964894 }, { "Año": 2021, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 902, "Top_2_Box (%)": 0.8946784922394678, "Promedio (1-5)": 4.529933481152994 }, { "Año": 2022, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 2377, "Top_2_Box (%)": 0.9015565839293227, "Promedio (1-5)": 4.517038283550694 }, { "Año": 2023, "Código": "IMP_06", "Indicador": "Desarrollar habilidades transversales", "N_Respuestas": 1920, "Top_2_Box (%)": 0.9395833333333333, "Promedio (1-5)": 4.668229166666666 }, { "Año": 2021, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 898, "Top_2_Box (%)": 0.8930957683741648, "Promedio (1-5)": 4.522271714922049 }, { "Año": 2022, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8971924029727498, "Promedio (1-5)": 4.47233691164327 }, { "Año": 2023, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 1913, "Top_2_Box (%)": 0.9393622582331417, "Promedio (1-5)": 4.653423941453215 }, { "Año": 2024, "Código": "IMP_07", "Indicador": "Enfrentar desafíos con seguridad", "N_Respuestas": 3661, "Top_2_Box (%)": 0.875717017208413, "Promedio (1-5)": 4.435673313302376 }, { "Año": 2024, "Código": "IMP_08", "Indicador": "Compromiso con la sociedad", "N_Respuestas": 3658, "Top_2_Box (%)": 0.8698742482230727, "Promedio (1-5)": 4.406232914160744 }, { "Año": 2024, "Código": "IMP_09", "Indicador": "Ser ciudadano responsable", "N_Respuestas": 3651, "Top_2_Box (%)": 0.8619556285949055, "Promedio (1-5)": 4.372774582306217 }, { "Año": 2024, "Código": "IMP_10", "Indicador": "Incrementar redes de contactos", "N_Respuestas": 3647, "Top_2_Box (%)": 0.7781738415135728, "Promedio (1-5)": 4.151083081985194 }, { "Año": 2025, "Código": "IMP_10", "Indicador": "Incrementar redes de contactos", "N_Respuestas": 4362, "Top_2_Box (%)": 0.7888583218707015, "Promedio (1-5)": 4.216185236130215 }, { "Año": 2025, "Código": "IMP_11", "Indicador": "Trabajar con otras carreras", "N_Respuestas": 4362, "Top_2_Box (%)": 0.7491976157725814, "Promedio (1-5)": 4.073590096286107 }, { "Año": 2025, "Código": "IMP_12", "Indicador": "Conocer campo laboral", "N_Respuestas": 4372, "Top_2_Box (%)": 0.886779505946935, "Promedio (1-5)": 4.510064043915828 }, { "Año": 2025, "Código": "IMP_13", "Indicador": "Interactuar en contexto real", "N_Respuestas": 4366, "Top_2_Box (%)": 0.8925790196976637, "Promedio (1-5)": 4.542143838754008 }, { "Año": 2025, "Código": "IMP_14", "Indicador": "Aportar desde el rol profesional", "N_Respuestas": 4375, "Top_2_Box (%)": 0.9227428571428572, "Promedio (1-5)": 4.629485714285714 }], "habilidades": [{ "Año": 2022, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8670520231213873, "Promedio (1-5)": 4.34971098265896 }, { "Año": 2023, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 1944, "Top_2_Box (%)": 0.9125514403292181, "Promedio (1-5)": 4.504115226337449 }, { "Año": 2024, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 3583, "Top_2_Box (%)": 0.8716159642757466, "Promedio (1-5)": 4.395757744906503 }, { "Año": 2025, "Código": "HAB_01", "Indicador": "Empatía", "N_Respuestas": 4303, "Top_2_Box (%)": 0.9079711828956541, "Promedio (1-5)": 4.540785498489426 }, { "Año": 2021, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 898, "Top_2_Box (%)": 0.8741648106904232, "Promedio (1-5)": 4.409799554565701 }, { "Año": 2022, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 2391, "Top_2_Box (%)": 0.890840652446675, "Promedio (1-5)": 4.411125052279381 }, { "Año": 2023, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 1945, "Top_2_Box (%)": 0.9311053984575836, "Promedio (1-5)": 4.578920308483291 }, { "Año": 2024, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 3585, "Top_2_Box (%)": 0.8722454672245468, "Promedio (1-5)": 4.39442119944212 }, { "Año": 2025, "Código": "HAB_02", "Indicador": "Comunicación efectiva", "N_Respuestas": 4283, "Top_2_Box (%)": 0.9087088489376606, "Promedio (1-5)": 4.522997898669157 }, { "Año": 2021, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 897, "Top_2_Box (%)": 0.8818283166109253, "Promedio (1-5)": 4.410256410256411 }, { "Año": 2022, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 2422, "Top_2_Box (%)": 0.8897605284888522, "Promedio (1-5)": 4.43270024772915 }, { "Año": 2023, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 1936, "Top_2_Box (%)": 0.940599173553719, "Promedio (1-5)": 4.600206611570248 }, { "Año": 2024, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 3579, "Top_2_Box (%)": 0.8689578094439787, "Promedio (1-5)": 4.408493992735401 }, { "Año": 2025, "Código": "HAB_03", "Indicador": "Trabajo en equipo / Colaboración", "N_Respuestas": 4278, "Top_2_Box (%)": 0.9104721832632071, "Promedio (1-5)": 4.539971949509116 }, { "Año": 2021, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 900, "Top_2_Box (%)": 0.8766666666666667, "Promedio (1-5)": 4.35 }, { "Año": 2022, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 2389, "Top_2_Box (%)": 0.8580996232733361, "Promedio (1-5)": 4.362913352867309 }, { "Año": 2023, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 1943, "Top_2_Box (%)": 0.9161091096242924, "Promedio (1-5)": 4.53937210499228 }, { "Año": 2024, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 3573, "Top_2_Box (%)": 0.8701371396585502, "Promedio (1-5)": 4.390428211586902 }, { "Año": 2025, "Código": "HAB_04", "Indicador": "Resolución de problemas", "N_Respuestas": 4261, "Top_2_Box (%)": 0.9089415630133771, "Promedio (1-5)": 4.509035437690683 }, { "Año": 2021, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 892, "Top_2_Box (%)": 0.8778026905829597, "Promedio (1-5)": 4.38677130044843 }, { "Año": 2022, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 2392, "Top_2_Box (%)": 0.8758361204013378, "Promedio (1-5)": 4.3938127090301 }, { "Año": 2023, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 1940, "Top_2_Box (%)": 0.931958762886598, "Promedio (1-5)": 4.57319587628866 }, { "Año": 2024, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 3575, "Top_2_Box (%)": 0.8760839160839161, "Promedio (1-5)": 4.423216783216783 }, { "Año": 2025, "Código": "HAB_05", "Indicador": "Adaptación y flexibilidad", "N_Respuestas": 4262, "Top_2_Box (%)": 0.9160018770530267, "Promedio (1-5)": 4.556780854059127 }, { "Año": 2022, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 2387, "Top_2_Box (%)": 0.8462505236698785, "Promedio (1-5)": 4.302471721826561 }, { "Año": 2023, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 1946, "Top_2_Box (%)": 0.8869475847893115, "Promedio (1-5)": 4.435765673175745 }, { "Año": 2024, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 3561, "Top_2_Box (%)": 0.8323504633529908, "Promedio (1-5)": 4.276046054479079 }, { "Año": 2025, "Código": "HAB_06", "Indicador": "Competencia disciplinar", "N_Respuestas": 4270, "Top_2_Box (%)": 0.8880562060889929, "Promedio (1-5)": 4.440983606557377 }, { "Año": 2021, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 899, "Top_2_Box (%)": 0.8798665183537263, "Promedio (1-5)": 4.404894327030034 }, { "Año": 2022, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 2392, "Top_2_Box (%)": 0.8712374581939799, "Promedio (1-5)": 4.366220735785953 }, { "Año": 2023, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 1942, "Top_2_Box (%)": 0.9186405767250257, "Promedio (1-5)": 4.531925849639546 }, { "Año": 2024, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 3582, "Top_2_Box (%)": 0.8615298715801228, "Promedio (1-5)": 4.374930206588498 }, { "Año": 2025, "Código": "HAB_07", "Indicador": "Manejo de información (toma de decisiones)", "N_Respuestas": 4267, "Top_2_Box (%)": 0.9083665338645418, "Promedio (1-5)": 4.525427700960862 }, { "Año": 2022, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 2376, "Top_2_Box (%)": 0.8303872053872053, "Promedio (1-5)": 4.284511784511785 }, { "Año": 2023, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 1940, "Top_2_Box (%)": 0.8896907216494845, "Promedio (1-5)": 4.442268041237114 }, { "Año": 2024, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 3584, "Top_2_Box (%)": 0.8618861607142857, "Promedio (1-5)": 4.391462053571429 }, { "Año": 2025, "Código": "HAB_08", "Indicador": "Prolijidad / Atención al detalle", "N_Respuestas": 4279, "Top_2_Box (%)": 0.9161018929656461, "Promedio (1-5)": 4.546623042767002 }, { "Año": 2021, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 903, "Top_2_Box (%)": 0.8471760797342193, "Promedio (1-5)": 4.258028792912514 }, { "Año": 2022, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 2389, "Top_2_Box (%)": 0.8526580159062369, "Promedio (1-5)": 4.343658434491419 }, { "Año": 2023, "Código": "HAB_09", "Indicador": "Pensamiento crítico y reflexivo", "N_Respuestas": 1940, "Top_2_Box (%)": 0.9056701030927835, "Promedio (1-5)": 4.507731958762887 }, { "Año": 2021, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 902, "Top_2_Box (%)": 0.852549889135255, "Promedio (1-5)": 4.349223946784923 }, { "Año": 2022, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 2393, "Top_2_Box (%)": 0.8499791057250313, "Promedio (1-5)": 4.316757208524864 }, { "Año": 2023, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 1944, "Top_2_Box (%)": 0.8909465020576132, "Promedio (1-5)": 4.482510288065844 }, { "Año": 2025, "Código": "HAB_10", "Indicador": "Ciudadanía responsable", "N_Respuestas": 4266, "Top_2_Box (%)": 0.9057665260196905, "Promedio (1-5)": 4.531411157993436 }, { "Año": 2021, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 899, "Top_2_Box (%)": 0.8342602892102335, "Promedio (1-5)": 4.310344827586207 }, { "Año": 2022, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 2383, "Top_2_Box (%)": 0.8489299202685691, "Promedio (1-5)": 4.348720100713386 }, { "Año": 2023, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 1926, "Top_2_Box (%)": 0.8935617860851506, "Promedio (1-5)": 4.481827622014538 }, { "Año": 2024, "Código": "HAB_11", "Indicador": "Creatividad / Pensamiento innovador", "N_Respuestas": 3582, "Top_2_Box (%)": 0.8531546621998883, "Promedio (1-5)": 4.35427135678392 }, { "Año": 2024, "Código": "HAB_12", "Indicador": "Autoconsciencia", "N_Respuestas": 3578, "Top_2_Box (%)": 0.8630519843487983, "Promedio (1-5)": 4.395472330911123 }], "indicadores": [{ "Año": 2021, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 903, "Resultado (%)": 0.8815060908084164 }, { "Año": 2022, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 2403, "Resultado (%)": 0.8555971702039118 }, { "Año": 2023, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 1949, "Resultado (%)": 0.9076449461262186 }, { "Año": 2024, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 3967, "Resultado (%)": 0.8404335770103353 }, { "Año": 2025, "Indicador": "Significancia en Formación (T2B)", "N_Respuestas": 4622, "Resultado (%)": 0.87559498052791 }, { "Año": 2021, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 904, "Resultado (%)": 0.879424778761062 }, { "Año": 2022, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 2405, "Resultado (%)": 0.8798336798336799 }, { "Año": 2023, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 1950, "Resultado (%)": 0.9338461538461539 }, { "Año": 2024, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 3502, "Resultado (%)": 0.846087949743004 }, { "Año": 2025, "Indicador": "Importancia para Beneficiados (T2B)", "N_Respuestas": 4341, "Resultado (%)": 0.8730707210320203 }, { "Año": 2021, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 905, "Resultado (%)": 0.8419889502762431 }, { "Año": 2022, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 2405, "Resultado (%)": 0.8054054054054054 }, { "Año": 2023, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 1943, "Resultado (%)": 0.8605249613998971 }, { "Año": 2024, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 3526, "Resultado (%)": 0.7912648893930799 }, { "Año": 2025, "Indicador": "Expectativas Cumplidas (T2B)", "N_Respuestas": 4323, "Resultado (%)": 0.650705528568124 }, { "Año": 2021, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 907, "Resultado (%)": 0.9713340683572216 }, { "Año": 2022, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 2403, "Resultado (%)": 0.9558884727424053 }, { "Año": 2023, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 1946, "Resultado (%)": 0.9707091469681398 }, { "Año": 2024, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 3514, "Resultado (%)": 0.9450768355150825 }, { "Año": 2025, "Indicador": "Recomendaría a compañeros (% Sí)", "N_Respuestas": 4294, "Resultado (%)": 0.9373544480670704 }, { "Año": 2021, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 901, "Resultado (%)": 0.9411764705882353 }, { "Año": 2022, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 2394, "Resultado (%)": 0.935672514619883 }, { "Año": 2023, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 1942, "Resultado (%)": 0.9387229660144182 }, { "Año": 2024, "Indicador": "Permitió conocer campo laboral (% Sí)", "N_Respuestas": 3591, "Resultado (%)": 0.9019771651350599 }, { "Año": 2024, "Indicador": "Sabía que era VcM (% Sí)", "N_Respuestas": 3541, "Resultado (%)": 0.8602089805139791 }, { "Año": 2025, "Indicador": "Sabía que era VcM (% Sí)", "N_Respuestas": 4335, "Resultado (%)": 0.8590542099192618 }], "valores": [{ "Año": 2021, "Valor Sebastiano": "Responsabilidad", "Menciones": 546, "% de Estudiantes": 0.5993413830954994 }, { "Año": 2021, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 404, "% de Estudiantes": 0.4434687156970362 }, { "Año": 2021, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 358, "% de Estudiantes": 0.3929747530186608 }, { "Año": 2021, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 222, "% de Estudiantes": 0.2436882546652031 }, { "Año": 2021, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 212, "% de Estudiantes": 0.2327113062568606 }, { "Año": 2021, "Valor Sebastiano": "Honestidad", "Menciones": 131, "% de Estudiantes": 0.1437980241492865 }, { "Año": 2021, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 109, "% de Estudiantes": 0.119648737650933 }, { "Año": 2021, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 82, "% de Estudiantes": 0.09001097694840834 }, { "Año": 2021, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 71, "% de Estudiantes": 0.07793633369923161 }, { "Año": 2021, "Valor Sebastiano": "Ninguno", "Menciones": 9, "% de Estudiantes": 0.009879253567508232 }, { "Año": 2022, "Valor Sebastiano": "Responsabilidad", "Menciones": 1572, "% de Estudiantes": 0.6490503715937241 }, { "Año": 2022, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 1085, "% de Estudiantes": 0.4479768786127168 }, { "Año": 2022, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 982, "% de Estudiantes": 0.4054500412881916 }, { "Año": 2022, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 583, "% de Estudiantes": 0.240710156895128 }, { "Año": 2022, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 573, "% de Estudiantes": 0.2365813377374071 }, { "Año": 2022, "Valor Sebastiano": "Honestidad", "Menciones": 410, "% de Estudiantes": 0.1692815854665566 }, { "Año": 2022, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 313, "% de Estudiantes": 0.1292320396366639 }, { "Año": 2022, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 308, "% de Estudiantes": 0.1271676300578035 }, { "Año": 2022, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 145, "% de Estudiantes": 0.05986787778695293 }, { "Año": 2022, "Valor Sebastiano": "Ninguno", "Menciones": 7, "% de Estudiantes": 0.002890173410404624 }, { "Año": 2023, "Valor Sebastiano": "Responsabilidad", "Menciones": 1289, "% de Estudiantes": 0.6600102406554019 }, { "Año": 2023, "Valor Sebastiano": "Laboriosidad y vocación por el trabajo bien hecho", "Menciones": 909, "% de Estudiantes": 0.4654377880184332 }, { "Año": 2023, "Valor Sebastiano": "Solidaridad, alegría de servir y sentido del deber", "Menciones": 907, "% de Estudiantes": 0.4644137224782386 }, { "Año": 2023, "Valor Sebastiano": "Espíritu de superación y progreso personal", "Menciones": 510, "% de Estudiantes": 0.261136712749616 }, { "Año": 2023, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 432, "% de Estudiantes": 0.2211981566820277 }, { "Año": 2023, "Valor Sebastiano": "Honestidad", "Menciones": 329, "% de Estudiantes": 0.1684587813620072 }, { "Año": 2023, "Valor Sebastiano": "Valor de la caridad y la justicia", "Menciones": 315, "% de Estudiantes": 0.1612903225806452 }, { "Año": 2023, "Valor Sebastiano": "Cultivo de la reflexión y la racionalidad", "Menciones": 304, "% de Estudiantes": 0.155657962109575 }, { "Año": 2023, "Valor Sebastiano": "Búsqueda de la verdad", "Menciones": 142, "% de Estudiantes": 0.07270865335381464 }, { "Año": 2023, "Valor Sebastiano": "Ninguno", "Menciones": 3, "% de Estudiantes": 0.001536098310291859 }, { "Año": 2024, "Valor Sebastiano": "La responsabilidad y la prudencia", "Menciones": 2181, "% de Estudiantes": 0.5493702770780856 }, { "Año": 2024, "Valor Sebastiano": "La solidaridad y alegría de servir", "Menciones": 2002, "% de Estudiantes": 0.5042821158690176 }, { "Año": 2024, "Valor Sebastiano": "La racionalidad y capacidad de reflexión", "Menciones": 1325, "% de Estudiantes": 0.3337531486146096 }, { "Año": 2024, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 1238, "% de Estudiantes": 0.3118387909319899 }, { "Año": 2024, "Valor Sebastiano": "El espíritu de superación", "Menciones": 855, "% de Estudiantes": 0.2153652392947103 }, { "Año": 2024, "Valor Sebastiano": "La tolerancia", "Menciones": 693, "% de Estudiantes": 0.1745591939546599 }, { "Año": 2024, "Valor Sebastiano": "La honestidad", "Menciones": 601, "% de Estudiantes": 0.1513853904282116 }, { "Año": 2024, "Valor Sebastiano": "La dignidad superior de la persona humana", "Menciones": 594, "% de Estudiantes": 0.1496221662468514 }, { "Año": 2024, "Valor Sebastiano": "El cultivo de la verdad", "Menciones": 286, "% de Estudiantes": 0.07204030226700252 }, { "Año": 2024, "Valor Sebastiano": "La justicia", "Menciones": 266, "% de Estudiantes": 0.06700251889168765 }, { "Año": 2025, "Valor Sebastiano": "La responsabilidad y la prudencia", "Menciones": 2116, "% de Estudiantes": 0.4571181680708576 }, { "Año": 2025, "Valor Sebastiano": "La solidaridad y alegría de servir", "Menciones": 1804, "% de Estudiantes": 0.3897170015122057 }, { "Año": 2025, "Valor Sebastiano": "La racionalidad y capacidad de reflexión", "Menciones": 1561, "% de Estudiantes": 0.3372218621732556 }, { "Año": 2025, "Valor Sebastiano": "Fortaleza y perseverancia", "Menciones": 914, "% de Estudiantes": 0.197450853316051 }, { "Año": 2025, "Valor Sebastiano": "La tolerancia", "Menciones": 704, "% de Estudiantes": 0.1520846835169583 }, { "Año": 2025, "Valor Sebastiano": "La dignidad superior de la persona humana", "Menciones": 649, "% de Estudiantes": 0.1402030676171959 }, { "Año": 2025, "Valor Sebastiano": "El espíritu de superación", "Menciones": 597, "% de Estudiantes": 0.1289695398574206 }, { "Año": 2025, "Valor Sebastiano": "La honestidad", "Menciones": 541, "% de Estudiantes": 0.1168718945776626 }, { "Año": 2025, "Valor Sebastiano": "La justicia", "Menciones": 326, "% de Estudiantes": 0.0704255778785915 }, { "Año": 2025, "Valor Sebastiano": "El cultivo de la verdad", "Menciones": 307, "% de Estudiantes": 0.06632101965867358 }] }; init();
+
+    // Full official names for indicators
+    const FULL_NAMES = {
+      'Aplicar lo aprendido en clases': 'Aplicar los contenidos de una asignatura de mi carrera',
+      'Conocer la realidad (problemas/desafíos)': 'Conocer la realidad, conectando con problemáticas de personas, instituciones o comunidades',
+      'Fortalecer vocación profesional': 'Fortalecer mi vocación profesional',
+      'Fortalecer valores sebastianos': 'Fortalecer los valores sebastianos en mi persona',
+      'Potenciar desempeño futuro': 'Potenciar y fortalecer mi desempeño para mi futuro como profesional',
+      'Desarrollar habilidades transversales': 'Desarrollar habilidades transversales (Ejemplo: trabajo en equipo, comunicación, liderazgo, etc.)',
+      'Enfrentar desafíos con seguridad': 'Enfrentar con mayor seguridad o confianza los desafíos profesionales',
+      'Compromiso con la sociedad': 'Compromiso con la sociedad',
+      'Ser ciudadano responsable': 'Ser ciudadano responsable',
+      'Incrementar redes de contactos': 'Incrementar mis redes de contactos profesionales',
+      'Trabajar con otras carreras': 'Trabajar en conjunto con estudiantes de otras carreras',
+      'Conocer campo laboral': 'Conocer más de mi campo laboral',
+      'Interactuar en contexto real': 'Interactuar con las personas en un contexto real desde un rol profesional',
+      'Aportar desde el rol profesional': 'Entender cómo aportar desde un rol profesional al abordaje de los desafíos o problemas del entorno',
+      'Empatía': 'Empatía',
+      'Comunicación efectiva': 'Comunicación efectiva',
+      'Trabajo en equipo / Colaboración': 'Trabajo en equipo / Colaboración',
+      'Resolución de problemas': 'Resolución de problemas',
+      'Adaptación y flexibilidad': 'Adaptación y flexibilidad',
+      'Competencia disciplinar': 'Competencia disciplinar',
+      'Manejo de información (toma de decisiones)': 'Manejo de información y toma de decisiones',
+      'Prolijidad / Atención al detalle': 'Prolijidad / Atención al detalle',
+      'Pensamiento crítico y reflexivo': 'Pensamiento crítico y reflexivo',
+      'Ciudadanía responsable': 'Ciudadanía responsable',
+      'Creatividad / Pensamiento innovador': 'Creatividad / Pensamiento innovador',
+      'Autoconsciencia': 'Autoconsciencia',
+      'Significancia en Formación (T2B)': '% de estudiantes que declaran que la participación en iniciativas VcM fue significativa o muy significativa para su formación profesional',
+      'Importancia para Beneficiados (T2B)': '% de estudiantes que consideran importante o muy importante el impacto para los beneficiados',
+      'Expectativas Cumplidas (T2B)': '% de estudiantes cuyas expectativas fueron cumplidas en alto grado',
+      'Recomendaría a compañeros (% Sí)': '% de estudiantes que recomendarían a sus compañeros participar en un Proyecto Colaborativo VcM',
+      'Permitió conocer campo laboral (% Sí)': '% de estudiantes que consideran que el proyecto les permitió conocer su campo laboral',
+      'Sabía que era VcM (% Sí)': '% de estudiantes que sabían que su proyecto era de Vinculación con el Medio'
+    };
+
+    // Section-specific title prefixes
+    const SECTION_TITLE_PREFIX = {
+      'imp': 'Porcentaje de estudiantes que evalúa como importante su participación en el proyecto para: ',
+      'hab': 'Porcentaje de estudiantes que declaran que se fortaleció: ',
+      'ind': '',
+      'val': 'Porcentaje de estudiantes que identifican el valor: '
+    };
+    const SECTION_METRIC_SUFFIX = {
+      'imp': ' (Top-2-Box: Importante + Muy importante)',
+      'hab': ' (Top-2-Box: Fortalecida + Muy fortalecida)',
+      'ind': '',
+      'val': ''
+    };
+
+    function wrapTitle(text, maxLen) {
+      if (text.length <= maxLen) return text;
+      const words = text.split(' ');
+      const lines = []; let current = '';
+      words.forEach(w => {
+        if ((current + ' ' + w).trim().length > maxLen && current) { lines.push(current.trim()); current = w; }
+        else { current = current ? current + ' ' + w : w; }
+      });
+      if (current) lines.push(current.trim());
+      return lines;
+    }
+
+    function getDynamicTitle(sec, items, selectedYear) {
+      const yearText = selectedYear ? selectedYear : 'Todos los años';
+      if (items.length === 1) {
+        const name = items[0];
+        const fullName = FULL_NAMES[name] || name;
+        const prefix = SECTION_TITLE_PREFIX[sec] || '';
+        const suffix = SECTION_METRIC_SUFFIX[sec] || '';
+        return wrapTitle(prefix + fullName + suffix, 60);
+      }
+      const sectionNames = { 'imp': 'Importancia Aspectos Formativos', 'hab': 'Desarrollo de Habilidades', 'ind': 'Indicadores Clave', 'val': 'Valores Sebastianos' };
+      return (sectionNames[sec] || 'Resultados') + ' — ' + yearText;
+    }
+
+    function updateInterpretation(sec, items, rawData, labelField, valueField, selectedYear) {
+      const el = document.getElementById('interp-' + sec);
+      if (!el) return;
+      if (items.length === 0) { el.innerHTML = ''; return; }
+      if (items.length === 1) {
+        const name = items[0];
+        const fullName = FULL_NAMES[name] || name;
+        const allData = rawData.filter(r => r[labelField] === name);
+        if (selectedYear) {
+          const d = allData.find(r => r['Año'] === selectedYear);
+          const val = d ? (d[valueField] * 100).toFixed(1).replace('.', ',') : 'N/D';
+          const n = d ? d.N_Respuestas || d.Menciones || '' : '';
+          const avg = allData.reduce((s, r) => s + r[valueField], 0) / Math.max(1, allData.length) * 100;
+          const avgText = avg.toFixed(1).replace('.', ',');
+          el.innerHTML = '<strong>Interpretación:</strong> En <strong>' + selectedYear + '</strong>, el <strong>' + val + '%</strong> de los estudiantes reporta un resultado positivo en \"' + fullName + '\". El promedio histórico es de <strong>' + avgText + '%</strong>.' + (n ? ' <em>(n = ' + n.toLocaleString('es-CL') + ' respuestas)</em>' : '');
+        } else {
+          const vals = allData.map(r => r[valueField] * 100);
+          const first = vals[0], last = vals[vals.length - 1];
+          const trend = last > first + 2 ? 'creciente' : (last < first - 2 ? 'decreciente' : 'estable');
+          el.innerHTML = '<strong>Interpretación:</strong> El indicador \"' + fullName + '\" muestra una tendencia <strong>' + trend + '</strong> entre ' + allData[0]['Año'] + ' y ' + allData[allData.length - 1]['Año'] + ', pasando de <strong>' + first.toFixed(1).replace('.', ',') + '%</strong> a <strong>' + last.toFixed(1).replace('.', ',') + '%</strong>.';
+        }
+      } else {
+        el.innerHTML = '<strong>Nota:</strong> Seleccione un solo indicador para ver la interpretación descriptiva detallada y el número de respuestas validadas.';
+      }
+    }
+
+    function init() {
+      buildSection('imp', DATA.importancia, 'Indicador', 'Top_2_Box (%)');
+      buildSection('hab', DATA.habilidades, 'Indicador', 'Top_2_Box (%)');
+      buildIndicadores();
+      buildSection('val', DATA.valores, 'Valor Sebastiano', '% de Estudiantes');
+      buildTrends();
+      buildValImp04();
+      buildDimensions();
+    }
+
+    function buildValImp04() {
+      const imp04 = DATA.importancia.filter(r => r['Código'] === 'IMP_04');
+      const years = imp04.map(r => r['Año']);
+      const vals = imp04.map(r => r['Top_2_Box (%)'] * 100);
+      charts['val-imp04'] = new Chart(document.getElementById('chart-val-imp04'), {
+        type: 'bar',
+        data: { labels: years, datasets: [{ label: 'Fortalecer valores sebastianos (T2B %)', data: vals, backgroundColor: years.map(y => YEAR_COLORS[y]), borderRadius: 6 }] },
+        options: {
+          responsive: true,
+          plugins: {
+            datalabels: { color: '#fff', font: { weight: 'bold', size: 14 }, formatter: v => (v.toFixed(1) + '%').replace('.', ',') },
+            title: { display: true, text: 'Fortalecer los valores sebastianos en mi persona (T2B %)', color: '#333', font: { size: 16 } },
+            legend: { display: false }
+          },
+          scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+        }
+      });
+    }
+
+
+    function setChartHeight(canvas, h) {
+      canvas.parentElement.style.height = h + 'px';
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('sec-' + id).classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    /* ═══════ GENERIC SECTION BUILDER (imp, hab) ═══════ */
+    function buildSection(key, rawData, labelField, valueField) {
+      const years = [...new Set(rawData.map(r => r['Año']))].sort();
+      const items = [...new Set(rawData.map(r => r[labelField]))];
+      sectionState[key] = { rawData, labelField, valueField, selectedYear: null, activeItems: new Set(items), sortBy: 'default' };
+
+      // Year buttons
+      const yf = document.getElementById('yf-' + key);
+      const allBtn = document.createElement('button');
+      allBtn.className = 'year-btn active'; allBtn.textContent = 'Todos';
+      allBtn.onclick = () => { sectionState[key].selectedYear = null; refreshSection(key) };
+      yf.appendChild(allBtn);
+      years.forEach(y => {
+        const b = document.createElement('button'); b.className = 'year-btn'; b.textContent = y;
+        b.onclick = () => { sectionState[key].selectedYear = y; refreshSection(key) };
+        yf.appendChild(b);
+      });
+
+      // Control bar: Select All / None / Sort
+      const ctrl = document.getElementById('ctrl-' + key);
+      ctrl.innerHTML = '<button onclick="toggleAll(\'' + key + '\',true)">✓ Todos</button>'
+        + '<button onclick="toggleAll(\'' + key + '\',false)">✕ Ninguno</button>'
+        + '<button class="sort-btn" id="sort-' + key + '" onclick="toggleSort(\'' + key + '\')">↕ Ordenar por valor</button>'
+        + '<span class="item-count" id="count-' + key + '"></span>';
+
+      buildChips(key);
+      refreshSection(key);
+    }
+
+    function buildChips(key) {
+      const st = sectionState[key];
+      const container = document.getElementById('chips-' + key);
+      container.innerHTML = '';
+      const items = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      items.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'item-chip' + (st.activeItems.has(item) ? '' : ' off');
+        chip.textContent = item;
+        chip.onclick = () => {
+          if (st.activeItems.has(item)) st.activeItems.delete(item);
+          else st.activeItems.add(item);
+          chip.classList.toggle('off');
+          updateCount(key);
+          redrawChart(key);
+        };
+        container.appendChild(chip);
+      });
+      updateCount(key);
+    }
+
+    function updateCount(key) {
+      const st = sectionState[key];
+      const total = [...new Set(st.rawData.map(r => r[st.labelField]))].length;
+      document.getElementById('count-' + key).textContent = st.activeItems.size + ' de ' + total + ' seleccionados';
+    }
+
+    function toggleAll(key, on) {
+      const st = sectionState[key];
+      const items = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      if (on) items.forEach(i => st.activeItems.add(i));
+      else st.activeItems.clear();
+      document.querySelectorAll('#chips-' + key + ' .item-chip').forEach(c => {
+        if (on) c.classList.remove('off'); else c.classList.add('off');
+      });
+      updateCount(key);
+      redrawChart(key);
+    }
+
+    function toggleSort(key) {
+      const st = sectionState[key];
+      st.sortBy = st.sortBy === 'value' ? 'default' : 'value';
+      const btn = document.getElementById('sort-' + key);
+      btn.classList.toggle('active', st.sortBy === 'value');
+      btn.textContent = st.sortBy === 'value' ? '↕ Orden original' : '↕ Ordenar por valor';
+      redrawChart(key);
+    }
+
+    function refreshSection(key) {
+      // Update year button states
+      const st = sectionState[key];
+      document.querySelectorAll('#yf-' + key + ' .year-btn').forEach(b => {
+        if (st.selectedYear === null && b.textContent === 'Todos') b.classList.add('active');
+        else if (b.textContent == st.selectedYear) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+
+      // When year changes, reset active items to those available
+      const allItems = [...new Set(st.rawData.map(r => r[st.labelField]))];
+      if (st.selectedYear !== null) {
+        const availItems = new Set(st.rawData.filter(r => r['Año'] === st.selectedYear).map(r => r[st.labelField]));
+        st.activeItems = new Set([...availItems]);
+      } else {
+        st.activeItems = new Set(allItems);
+      }
+      buildChips(key);
+      redrawChart(key);
+    }
+
+    function redrawChart(sec) {
+      const st = sectionState[sec];
+      const { rawData, labelField, valueField, selectedYear } = st;
+      const years = [...new Set(rawData.map(r => r['Año']))].sort();
+
+      if (charts[sec]) charts[sec].destroy();
+      const canvas = document.getElementById('chart-' + sec);
+      const availEl = document.getElementById('avail-' + sec);
+
+      let filtered = [];
+      if (selectedYear !== null) {
+        filtered = rawData.filter(r => r['Año'] === selectedYear && st.activeItems.has(r[labelField]));
+        if (st.sortBy === 'value') filtered.sort((a, b) => b[valueField] - a[valueField]);
+      } else {
+        filtered = [...st.activeItems];
+      }
+
+      const isSingleItem = (selectedYear !== null && filtered.length === 1) || (selectedYear === null && st.activeItems.size === 1);
+      setChartHeight(canvas, isSingleItem ? 400 : Math.max(filtered.length * (selectedYear === null ? 100 : 50), 250));
+      const indexAxis = isSingleItem ? 'x' : 'y';
+
+      if (selectedYear !== null) {
+        const labels = filtered.map(r => r[labelField]);
+        const values = filtered.map(r => r[valueField] * 100);
+
+        // Availability note
+        const allItems = [...new Set(rawData.map(r => r[labelField]))];
+        const yearItems = new Set(rawData.filter(r => r['Año'] === selectedYear).map(r => r[labelField]));
+        const missing = allItems.filter(i => !yearItems.has(i));
+        if (missing.length > 0) {
+          availEl.innerHTML = '<strong>No disponible en ' + selectedYear + ':</strong> ' + missing.join(', ');
+          availEl.style.display = 'inline-block';
+        } else { availEl.style.display = 'none'; }
+
+        if (isSingleItem) setChartHeight(canvas, 400);
+        else setChartHeight(canvas, Math.max(labels.length * 55, 250));
+
+        const barOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 50 } : { borderRadius: 4, borderSkipped: false, barThickness: 22 };
+        charts[sec] = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: isSingleItem ? [selectedYear] : labels,
+            datasets: [{
+              data: values,
+              backgroundColor: YEAR_COLORS[selectedYear],
+              ...barOpts
+            }]
+          },
+          options: {
+            indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: getDynamicTitle(sec, labels, selectedYear), font: { size: isSingleItem ? 18 : 18, weight: 'bold' }, padding: { bottom: 16 } },
+              datalabels: {
+                color: '#fff',
+                font: { weight: 'bold', size: 14 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
+                formatter: (value) => isSingleItem ? (value.toFixed(2) + '%').replace('.', ',') : (selectedYear + ': ' + (value.toFixed(2) + '%').replace('.', ','))
+              },
+              tooltip: {
+                titleFont: { size: 16 },
+                bodyFont: { size: 16 },
+                callbacks: { label: c => (c.raw.toFixed(2) + '%').replace('.', ',') }
+              }
+            },
+            scales: {
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: isSingleItem ? 14 : 15, weight: isSingleItem ? 'bold' : undefined } } }
+            }
+          }
+        });
+        updateInterpretation(sec, labels, rawData, labelField, valueField, selectedYear);
+      } else {
+        // ALL YEARS
+        availEl.style.display = 'none';
+        let items = [...st.activeItems];
+        if (st.sortBy === 'value') {
+          items.sort((a, b) => {
+            const avgA = rawData.filter(r => r[labelField] === a).reduce((s, r) => s + r[valueField], 0) / Math.max(1, rawData.filter(r => r[labelField] === a).length);
+            const avgB = rawData.filter(r => r[labelField] === b).reduce((s, r) => s + r[valueField], 0) / Math.max(1, rawData.filter(r => r[labelField] === b).length);
+            return avgB - avgA;
+          });
+        }
+        const allBarOpts = isSingleItem ? { borderRadius: 6, borderSkipped: false, maxBarThickness: 50 } : { borderRadius: 3, borderSkipped: false, barThickness: 16 };
+
+        // For single item: filter out years with no data and use years as X-axis labels
+        let singleLabels, singleDatasets;
+        if (isSingleItem) {
+          const item = items[0];
+          const yearsWithData = years.filter(y => {
+            const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+            return m && m[valueField] !== null && m[valueField] !== undefined;
+          });
+          singleLabels = yearsWithData.map(y => y.toString());
+          singleDatasets = [{
+            data: yearsWithData.map(y => {
+              const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+              return m ? (m[valueField] * 100) : null;
+            }),
+            backgroundColor: yearsWithData.map(y => YEAR_COLORS[y]),
+            ...allBarOpts
+          }];
+        } else {
+          singleLabels = items;
+          singleDatasets = years.map(y => ({
+            label: y.toString(),
+            data: items.map(item => {
+              const m = rawData.find(r => r[labelField] === item && r['Año'] === y);
+              return m ? (m[valueField] * 100) : null;
+            }),
+            backgroundColor: YEAR_COLORS[y],
+            ...allBarOpts
+          }));
+        }
+
+        if (isSingleItem) setChartHeight(canvas, 400);
+        else setChartHeight(canvas, Math.max(items.length * 150, 450));
+
+        charts[sec] = new Chart(canvas, {
+          type: 'bar',
+          data: { labels: singleLabels, datasets: singleDatasets },
+          options: {
+            indexAxis: indexAxis, responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: !isSingleItem, position: 'top', labels: { color: '#333333', usePointStyle: true, pointStyle: 'circle', font: { size: 15 } } },
+              title: { display: true, text: getDynamicTitle(sec, items, null), font: { size: isSingleItem ? 18 : 18, weight: 'bold' } },
+              datalabels: {
+                color: '#fff',
+                font: { weight: 'bold', size: isSingleItem ? 14 : 11 },
+                rotation: indexAxis === 'x' ? -90 : 0,
+                align: 'center',
+                formatter: (value, context) => {
+                  if (!value) return '';
+                  if (isSingleItem) return (value.toFixed(2) + '%').replace('.', ',');
+                  const yr = context.dataset.label;
+                  return yr + ': ' + (value.toFixed(1) + '%').replace('.', ',');
+                }
+              },
+              tooltip: {
+                titleFont: { size: 16 },
+                bodyFont: { size: 16 },
+                callbacks: { label: c => isSingleItem ? (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : '') : c.dataset.label + ': ' + (c.raw ? (c.raw.toFixed(2) + '%').replace('.', ',') : 'Sin dato') }
+              }
+            },
+            scales: {
+              [indexAxis === 'y' ? 'x' : 'y']: { min: 0, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } },
+              [indexAxis === 'y' ? 'y' : 'x']: { grid: { display: false }, ticks: { color: '#333333', font: { size: isSingleItem ? 14 : 15, weight: isSingleItem ? 'bold' : undefined } } }
+            }
+          }
+        });
+        updateInterpretation(sec, items, rawData, labelField, valueField, null);
+      }
+    }
+
+    /* ═══════ INDICADORES (unchanged logic) ═══════ */
+    function buildIndicadores() {
+      // Re-use buildSection for Indicadores to allow "Todos los años" and standard filtering
+      buildSection('ind', DATA.indicadores, 'Indicador', 'Resultado (%)');
+    }
+
+
+
+    /* ═══════ TRENDS (unchanged) ═══════ */
+
+
+    // === DIMENSIONS DATA ===
+    var DIM_DATA = {"Dim_1": {"titulo": "Despliegue territorial y articulacion con el entorno", "descripcion": "Observar el nivel de cobertura territorial, el alcance del despliegue institucional y la capacidad de articulacion con actores relevantes del entorno.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de proyectos colaborativos de Vinculación con el Medio implementados", "2022": 165, "2023": 205, "2024": 271, "2025": 264}, {"nombre": "N° de Programas Territoriales Hito activos por sede", "2022": 11, "2023": 11, "2024": 11, "2025": 11}, {"nombre": "N° de Consejos Sectoriales implementados", "2022": 67, "2023": 86, "2024": 80, "2025": 117}, {"nombre": "N° de Consejos Consultivos Territoriales ejecutados", "2022": null, "2023": 3, "2024": 7, "2025": 6}, {"nombre": "N° de actividades de extensión académica desarrolladas", "2022": 366, "2023": 629, "2024": 628, "2025": 629}, {"nombre": "N° de proyectos de innovación abierta desarrollados", "2022": null, "2023": null, "2024": null, "2025": 5}, {"nombre": "N° de proyectos con foco en políticas públicas*", "2022": 20, "2023": 25, "2024": 30, "2025": 40}, {"nombre": "N° de organizaciones participantes en proyectos colaborativos VcM", "2022": 217, "2023": 285, "2024": 345, "2025": 357}, {"nombre": "N° de comunas donde se implementan proyectos colaborativos VcM", "2022": 97, "2023": 102, "2024": 108, "2025": 113}, {"nombre": "N° de beneficiarios directos asociados a proyectos VcM**", "2022": 30609, "2023": 29489, "2024": 35012, "2025": 167419}, {"nombre": "N° de apariciones en medios relevantes asociadas a iniciativas de Vinculación con el Medio", "2022": 376, "2023": 491, "2024": 379, "2025": 466}]}, "Dim_2": {"titulo": "Sostenibilidad y reputacion del vinculo con el entorno", "descripcion": "Observar la capacidad institucional para sostener relaciones de colaboracion con actores del entorno en el tiempo, asi como la valoracion y reconocimiento que dichos actores desarrollan respecto de la VcM.", "anios": ["2021", "2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de organizaciones externas con dos o más años de participación en proyectos VcM", "2021": null, "2022": 108, "2023": 115, "2024": 123, "2025": 153}, {"nombre": "% de organizaciones externas, que contestan la encuesta de valoración, que manifiestan interés en continuar colaborando*", "2021": null, "2022": 0.88, "2023": 0.91, "2024": 0.94, "2025": 0.96}, {"nombre": "% de organizaciones externas, que contestan la encuesta de valoración, que recomendarían trabajar con la USS*", "2021": null, "2022": 0.86, "2023": 0.89, "2024": 0.93, "2025": 0.95}, {"nombre": "% de organizaciones externas, que contestan la encuesta de valoración, que contratarían egresados/profesionales de la USS**", "2021": null, "2022": 0.84, "2023": 0.87, "2024": 0.89, "2025": 0.92}, {"nombre": "% de organizaciones externas, que contestan la escuesta de valoracion, que creen que la USS logra vincularse adecuadamente con su entorno, conectando con las necesidades reales de las personas, comunidades u organizaciones", "2021": 0.9016, "2022": 0.9342, "2023": 0.9362, "2024": 0.8981, "2025": 0.9614}, {"nombre": "% de organizaciones externas, que contestan la encuesta de valoración, que cree que el proyecto tuvo un impacto positivo en la comunidad u organización beneficiada", "2021": 0.9508, "2022": 0.9342, "2023": 0.9574, "2024": 0.8878, "2025": 0.9559}, {"nombre": "% de organizaciones externas, que contestan la encuesta de valoración, que cree que se logró entregar un servicio o producto de calidad", "2021": 0.8852, "2022": 0.9079, "2023": 0.9342, "2024": 0.9151, "2025": 0.9804}]}, "Dim_5": {"titulo": "Resultados formativos en estudiantes", "descripcion": "Observar la contribucion de la VcM al desarrollo formativo de los estudiantes, considerando el fortalecimiento de competencias disciplinares y transversales.", "anios": ["2021", "2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "% de estudiantes que declaran que la participación en iniciativas VcM fue significativa o muy significativa para su formación profesional", "2021": 0.8815, "2022": 0.8556, "2023": 0.9076, "2024": 0.8404, "2025": 0.8756}, {"nombre": "% de estudiantes que consideran que el proyecto les permitió conocer su campo laboral ", "2021": 0.9412, "2022": 0.9357, "2023": 0.9387, "2024": 0.902, "2025": 0.9497}, {"nombre": "% de estudiantes que participan en proyectos multidisciplinarios", "2021": null, "2022": null, "2023": null, "2024": null, "2025": 0.7492}, {"nombre": "% de estudiantes que perciben colaboración interdisciplinaria a partir de iniciativas VcM", "2021": 0.8818, "2022": 0.8898, "2023": 0.9406, "2024": 0.869, "2025": 0.9105}, {"nombre": "% de estudiantes que fortalecen su competencia disciplinar a partir de iniciativas VcM", "2021": null, "2022": 0.8463, "2023": 0.8869, "2024": 0.8324, "2025": 0.8881}, {"nombre": "% de estudiantes que fortalecen manejo de información a partir de iniciativas VcM ", "2021": 0.8799, "2022": 0.8712, "2023": 0.9186, "2024": 0.8615, "2025": 0.9084}, {"nombre": "% de estudiantes que fortalecen prolijidad disciplinar a partir de iniciativas VcM", "2021": null, "2022": 0.8304, "2023": 0.8897, "2024": 0.8619, "2025": 0.9161}, {"nombre": "% de estudiantes que fortalecen empatía a partir de iniciativas VcM", "2021": null, "2022": 0.8671, "2023": 0.9126, "2024": 0.8716, "2025": 0.908}, {"nombre": "% de estudiantes que fortalecen colaboración a partir de iniciativas VcM", "2021": 0.8742, "2022": 0.8908, "2023": 0.9311, "2024": 0.8722, "2025": 0.9087}, {"nombre": "% de estudiantes que fortalecen comunicación a partir de iniciativas VcM", "2021": 0.8742, "2022": 0.8908, "2023": 0.9311, "2024": 0.8722, "2025": 0.9087}, {"nombre": "% de estudiantes que fortalecen adaptación y flexibilidad a partir de iniciativas VcM", "2021": 0.8778, "2022": 0.8758, "2023": 0.932, "2024": 0.8761, "2025": 0.916}, {"nombre": "% de estudiantes que fortalecen resolución de problemas", "2021": 0.8767, "2022": 0.8581, "2023": 0.9161, "2024": 0.8701, "2025": 0.9089}, {"nombre": "% de estudiantes que fortalecen habilidades de ciudadanía", "2021": 0.8525, "2022": 0.85, "2023": 0.8909, "2024": null, "2025": 0.9058}, {"nombre": "% de estudiantes que valoran la experiencia para conocer la realidad social", "2021": 0.8974, "2022": 0.9042, "2023": 0.9456, "2024": 0.9004, "2025": 0.9149}, {"nombre": "% de estudiantes que comprenden su aporte profesional", "2021": 0.9133, "2022": 0.9089, "2023": 0.9528, "2024": 0.9209, "2025": 0.9227}, {"nombre": "% de estudiantes que incrementan redes de contacto", "2021": null, "2022": null, "2023": null, "2024": 0.7782, "2025": 0.7889}, {"nombre": "% de estudiantes que fortalecen su vocación profesional", "2021": null, "2022": 0.8906, "2023": 0.934, "2024": 0.8882, "2025": 0.9018}, {"nombre": "% de estudiantes que fortalecen valores USS", "2021": 0.769, "2022": 0.72, "2023": 0.8001, "2024": 0.76, "2025": 0.823}, {"nombre": "% de estudiantes que aplican los aprendido en clases en el proyecto", "2021": 0.8996, "2022": 0.9042, "2023": 0.9372, "2024": 0.8681, "2025": 0.8974}]}, "Dim_6": {"titulo": "Desarrollo academico y fortalecimiento de la practica docente", "descripcion": "Observar el fortalecimiento del desarrollo academico, la innovacion en la practica docente y la consolidacion del rol del academico en el marco de la VcM.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "% de académicos, que contestan la encuesta de valoración, que perciben que el trabajo interdisciplinario generó sinergia disciplinar y profesional", "2022": null, "2023": null, "2024": 0.8417, "2025": 0.8138}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que manifiestan fortalecimiento de habilidades", "2022": null, "2023": null, "2024": 0.8356, "2025": 0.8419}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que manifiestan fortalecimiento de su rol como agentes de cambio social", "2022": null, "2023": null, "2024": 0.8106, "2025": 0.8254}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que declaran ampliación de redes profesionales y/o académicas", "2022": null, "2023": null, "2024": 0.7683, "2025": 0.7455}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que implementan nuevas didácticas educativas", "2022": null, "2023": null, "2024": 0.866, "2025": 0.9327}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que perciben incremento en la motivación de los estudiantes", "2022": null, "2023": null, "2024": 0.9153, "2025": 0.9052}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que perciben mejora en la interacción académico-estudiante", "2022": null, "2023": null, "2024": 0.9079, "2025": 0.9292}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que adquieren conocimientos relevantes desde realidades locales", "2022": null, "2023": null, "2024": 0.8378, "2025": 0.8411}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que profundizan comprensión de problemáticas territoriales", "2022": null, "2023": null, "2024": 0.8544, "2025": 0.8411}, {"nombre": "% de académicos, que contestan la encuesta de valoración, que señalan que la VcM contribuye a su desarrollo académico", "2022": null, "2023": null, "2024": 0.8419, "2025": 0.8419}, {"nombre": "Número de académicos líderes en VcM", "2022": 50, "2023": 65, "2024": 96, "2025": 104}]}, "Dim_7": {"titulo": "Generacion de conocimiento", "descripcion": "Observar la capacidad de la VcM para contribuir a la generacion y difusion de conocimiento academico y disciplinar.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de presentaciones a congresos asociadas a VcM", "2022": null, "2023": null, "2024": null, "2025": null}, {"nombre": "N° de productos de investigación disciplinar y/o innovación en docencia derivados de la VcM (publicaciones indexadas, capítulos de libros, entre otros)", "2022": 1, "2023": 10, "2024": 8, "2025": 8}]}, "Dim_8": {"titulo": "Pertinencia territorial y conexion con el entorno", "descripcion": "Evaluar el despliegue institucional asociado al desarrollo territorial y la capacidad de la universidad para vincularse con las necesidades del entorno relevante.", "anios": ["2021", "2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de proyectos con foco en políticas públicas", "2021": null, "2022": 27, "2023": 20, "2024": 22, "2025": 26}, {"nombre": "N° de proyectos que amplifican políticas públicas existentes", "2021": null, "2022": 50, "2023": 62, "2024": 81, "2025": 79}, {"nombre": "N° de productos desarrollados en el marco de proyectos VcM transferidos al sector público y/o privado", "2021": null, "2022": 27, "2023": 20, "2024": 22, "2025": 26}, {"nombre": "% actores del entorno que consideran que la USS logra vincularse conectando con las necesidades reales de las personas, comunidades u organizaciones", "2021": 0.9016, "2022": 0.9342, "2023": 0.9362, "2024": 0.8981, "2025": 0.9614}]}, "Dim_9": {"titulo": "Valoracion y contribucion territorial de la VcM", "descripcion": "Evaluar la valoracion que actores externos realizan respecto de la calidad y contribucion de las iniciativas de VcM.", "anios": ["2021", "2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "% actores del entorno que consideran que las iniciativas VcM entregaron servicios o productos de calidad", "2021": 0.8852, "2022": 0.9079, "2023": 0.9342, "2024": 0.9151, "2025": 0.9804}]}, "Dim_10": {"titulo": "Capacidades institucionales de la VcM", "descripcion": "Observar el nivel de desarrollo y consolidacion de las capacidades institucionales destinadas a sostener la implementacion de la VcM.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de académicos con dedicación preferente en Vinculación con el Medio", "2022": null, "2023": null, "2024": 48, "2025": 53}, {"nombre": "N° de académicos que han recibido formación institucional en Vinculación con el Medio (acumulado)", "2022": 48, "2023": 195, "2024": 325, "2025": 396}, {"nombre": "N° de docentes vinculados a VcM (planta y adjunto)", "2022": null, "2023": 665, "2024": 907, "2025": 956}, {"nombre": "N° de académicos USS participantes en proyectos colaborativos VcM (anual)", "2022": 643, "2023": 767, "2024": 1050, "2025": 1067}]}, "Dim_11": {"titulo": "Gestion y desempeno de la VcM", "descripcion": "Observar el nivel de cumplimiento, seguimiento y desempeno de las iniciativas y mecanismos institucionales asociados a la VcM.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "% de proyectos colaborativos que cumplen satisfactoriamente lo comprometido", "2022": 0.66, "2023": 0.71, "2024": 0.76, "2025": 0.81}, {"nombre": "% de cumplimiento de convenios de desempeño académico asociados a VcM", "2022": null, "2023": null, "2024": 0.9, "2025": 0.96}]}, "Dim_12": {"titulo": "Recursos e inversion en VcM", "descripcion": "Observar el nivel de recursos humanos, financieros, tecnologicos y organizacionales destinados al desarrollo de la VcM.", "anios": ["2022", "2023", "2024", "2025"], "indicadores": [{"nombre": "N° de horas totales dedicadas a VcM", "2022": null, "2023": 47274, "2024": 57398, "2025": 58169}, {"nombre": "Remuneraciones en académicos con dedicación preferente a VcM", "2022": null, "2023": null, "2024": 1203114, "2025": 1381692}, {"nombre": "Gasto en proyectos colaborativos", "2022": 128877, "2023": 162993, "2024": 204634, "2025": 232912}, {"nombre": "Fondos externos captados, públicos y privados", "2022": 3819410, "2023": 1372515, "2024": 911334, "2025": 1702588}, {"nombre": "Aportes no pecuniarios valorizados", "2022": 475604, "2023": 518658, "2024": 539759, "2025": 583807}, {"nombre": "Gasto en tecnologías, sistemas y plataformas", "2022": null, "2023": 26886, "2024": 62676, "2025": 64716}, {"nombre": "Gasto en formación y fortalecimiento de capacidades", "2022": 34966, "2023": 42584, "2024": 28967, "2025": 12494}, {"nombre": "Gasto en desarrollo de productos académicos", "2022": null, "2023": null, "2024": 4996, "2025": 6245}, {"nombre": "Gastos en jornadas de reflexión en evaluación en VcM", "2022": null, "2023": 21374, "2024": 23153, "2025": 22121}]}};
+
+    
+    var dimState = {};
+    var dimYear = null;
+    var dimCharts = {};
+    var DIM_YEAR_COLORS = {'2021':'#8e44ad','2022':'#f39c12','2023':'#e84393','2024':'#2980b9','2025':'#16a085'};
+
+    function setDimYear(y) {
+      dimYear = y;
+      var btns = document.getElementById('yf-dim').querySelectorAll('.yr-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      if(y === null) btns[0].classList.add('active');
+      else {
+        btns.forEach(b => { if(b.textContent === y) b.classList.add('active'); });
+      }
+      var dimOrder = ['Dim_1','Dim_2','Dim_5','Dim_6','Dim_7','Dim_8','Dim_9','Dim_10','Dim_11','Dim_12'];
+      dimOrder.forEach(dk => {
+        if(document.getElementById('body-'+dk) && document.getElementById('body-'+dk).style.display === 'block') {
+           updateDimChart(dk);
+        }
+      });
+    }
+
+    function buildDimensions() {
+      var container = document.getElementById('dim-content');
+      if (!container) return;
+      var h = '';
+      var dimOrder = ['Dim_1','Dim_2','Dim_5','Dim_6','Dim_7','Dim_8','Dim_9','Dim_10','Dim_11','Dim_12'];
+      
+      dimOrder.forEach(function(dk) {
+        var d = DIM_DATA[dk];
+        if (!d) return;
+        dimState[dk] = 0; // Default first indicator
+        var num = dk.replace('Dim_','');
+        h += '<div style="margin-bottom:24px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;background:#fff">';
+        h += '<div onclick="toggleDimAccordion(\''+dk+'\')" style="background:#1b365d;color:#fff;padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">';
+        h += '<div><strong>Dimensión ' + num + ':</strong> ' + d.titulo + '</div>';
+        h += '<span id="arrow-'+dk+'" style="font-size:14px">▶</span></div>'; // default closed
+        
+        h += '<div id="body-'+dk+'" style="display:none;padding:20px">';
+        h += '<p style="font-size:13px;color:#666;margin-bottom:16px;font-style:italic">' + d.descripcion + '</p>';
+        h += '<div class="item-chips" id="pills-'+dk+'" style="margin-bottom:20px"></div>';
+        h += '<div class="chart-wrap" style="height:350px"><canvas id="chart-'+dk+'"></canvas></div>';
+        h += '<div id="interp-'+dk+'" style="font-size: 13px; color: #475569; margin-top: 12px; padding: 12px 16px; background: #F8FAFC; border-left: 3px solid #1b365d; border-radius: 0 8px 8px 0;"></div>';
+        h += '</div></div>';
+      });
+      container.innerHTML = h;
+      
+      // Open the first one
+      toggleDimAccordion('Dim_1');
+    }
+
+    function toggleDimAccordion(dk) {
+       var body = document.getElementById('body-'+dk);
+       var arrow = document.getElementById('arrow-'+dk);
+       if(body.style.display === 'none') {
+          body.style.display = 'block';
+          arrow.textContent = '▼';
+          renderDimPills(dk);
+          updateDimChart(dk);
+       } else {
+          body.style.display = 'none';
+          arrow.textContent = '▶';
+       }
+    }
+
+    function renderDimPills(dk) {
+       var d = DIM_DATA[dk];
+       var html = '';
+       d.indicadores.forEach((ind, idx) => {
+          var cls = idx === dimState[dk] ? 'item-chip active' : 'item-chip';
+          html += '<div class="'+cls+'" onclick="setDimInd(\''+dk+'\','+idx+')" style="display:inline-block;padding:6px 12px;margin:4px;border-radius:16px;font-size:12px;cursor:pointer;background:'+(idx===dimState[dk]?'#1b365d':'#f1f5f9')+';color:'+(idx===dimState[dk]?'#fff':'#333')+'">' + ind.nombre + '</div>';
+       });
+       document.getElementById('pills-'+dk).innerHTML = html;
+    }
+
+    function setDimInd(dk, idx) {
+       dimState[dk] = idx;
+       renderDimPills(dk);
+       updateDimChart(dk);
+    }
+
+    function updateDimChart(dk) {
+       var d = DIM_DATA[dk];
+       var idx = dimState[dk];
+       var ind = d.indicadores[idx];
+       
+       var labels = [];
+       var data = [];
+       var colors = [];
+       var anios = d.anios;
+       
+       if(dimYear !== null) {
+          anios = [dimYear];
+       }
+       
+       var isPercent = false;
+       // First pass to determine if it's percent based on name or values
+       if(ind.nombre.includes('%')) isPercent = true;
+       
+       anios.forEach(a => {
+          var v = ind[a];
+          if(v !== null && v !== undefined && v !== 'S/I' && v !== '-') {
+             labels.push(a);
+             if(typeof v === 'number' && isPercent) {
+                data.push(v * 100);
+             } else {
+                data.push(v);
+                if(typeof v === 'number' && v > 0 && v <= 1 && !Number.isInteger(v)) isPercent = true; 
+             }
+             colors.push(dimYear === null ? (DIM_YEAR_COLORS[a] || '#1b365d') : '#1b365d');
+          }
+       });
+       
+       var ctx = document.getElementById('chart-'+dk).getContext('2d');
+       if(dimCharts[dk]) dimCharts[dk].destroy();
+       
+       var chartTitle = ind.nombre;
+       if(chartTitle.length > 90) {
+          var words = chartTitle.split(' ');
+          var lines = []; var cur = '';
+          words.forEach(w => { if((cur+' '+w).length > 90) { lines.push(cur); cur=w; } else cur += (cur?' ':'')+w; });
+          if(cur) lines.push(cur);
+          chartTitle = lines;
+       }
+
+       dimCharts[dk] = new Chart(ctx, {
+          type: 'bar',
+          data: {
+             labels: labels,
+             datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderRadius: 4,
+                maxBarThickness: 60
+             }]
+          },
+          options: {
+             responsive: true,
+             maintainAspectRatio: false,
+             plugins: {
+                legend: { display: false },
+                title: { display: true, text: chartTitle, font: { size: 14 } },
+                datalabels: {
+                   color: '#fff',
+                   font: { weight: 'bold', size: 12 },
+                   anchor: 'center',
+                   align: 'center',
+                   formatter: function(value) {
+                      if(isPercent) return value.toFixed(1).replace('.',',') + '%';
+                      if(value >= 1000) return value.toLocaleString('es-CL');
+                      return value;
+                   }
+                },
+                tooltip: {
+                   callbacks: {
+                      label: function(c) {
+                         if(isPercent) return c.raw.toFixed(1).replace('.',',') + '%';
+                         return c.raw.toLocaleString('es-CL');
+                      }
+                   }
+                }
+             },
+             scales: {
+                y: {
+                   beginAtZero: true,
+                   max: isPercent ? 100 : undefined,
+                   ticks: {
+                      callback: function(value) {
+                         if(isPercent) return value + '%';
+                         if(value >= 1000) return value.toLocaleString('es-CL');
+                         return value;
+                      }
+                   }
+                }
+             }
+          }
+       });
+
+       // Interpretation
+       var interpEl = document.getElementById('interp-'+dk);
+       if(labels.length === 0) {
+          interpEl.innerHTML = '<strong>Nota:</strong> No hay datos disponibles para el indicador seleccionado en el año '+ (dimYear||'seleccionado') +'.';
+       } else if (labels.length === 1) {
+          var valStr = isPercent ? data[0].toFixed(1).replace('.',',') + '%' : data[0].toLocaleString('es-CL');
+          interpEl.innerHTML = '<strong>Interpretación:</strong> En <strong>'+labels[0]+'</strong>, el indicador registra un valor de <strong>'+valStr+'</strong>.';
+       } else {
+          var first = data[0]; var last = data[data.length-1];
+          var trend = last > first ? 'un incremento' : (last < first ? 'una disminución' : 'estabilidad');
+          var v1 = isPercent ? first.toFixed(1).replace('.',',') + '%' : first.toLocaleString('es-CL');
+          var v2 = isPercent ? last.toFixed(1).replace('.',',') + '%' : last.toLocaleString('es-CL');
+          interpEl.innerHTML = '<strong>Interpretación:</strong> Entre '+labels[0]+' y '+labels[labels.length-1]+', el indicador muestra <strong>'+trend+'</strong>, pasando de <strong>'+v1+'</strong> a <strong>'+v2+'</strong>.';
+       }
+    }
+function buildTrends() {
+      const years = [2021, 2022, 2023, 2024, 2025];
+      const topHab = ['Empatía', 'Comunicación efectiva', 'Trabajo en equipo / Colaboración', 'Adaptación y flexibilidad'];
+      const ds1 = topHab.map((h, i) => ({
+        label: h, borderColor: COLORS[i], backgroundColor: COLORS[i] + '33',
+        data: years.map(y => { const m = DATA.habilidades.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Top_2_Box (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5
+      }));
+      charts.trend1 = new Chart(document.getElementById('chart-trend1'), {
+        type: 'line', data: { labels: years, datasets: ds1 },
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Top 4 Habilidades (T2B %)', color: '#333333', font: { size: 18 } }, legend: { labels: { color: '#666666', font: { size: 14 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { min: 70, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } } } }
+      });
+      const topImp = ['Conocer la realidad (problemas/desafíos)', 'Aplicar lo aprendido en clases', 'Fortalecer vocación profesional', 'Fortalecer valores sebastianos'];
+      const ds2 = topImp.map((h, i) => ({
+        label: h, borderColor: COLORS[i + 4], backgroundColor: COLORS[i + 4] + '33',
+        data: years.map(y => { const m = DATA.importancia.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Top_2_Box (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5
+      }));
+      charts.trend2 = new Chart(document.getElementById('chart-trend2'), {
+        type: 'line', data: { labels: years, datasets: ds2 },
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Top 4 Aspectos Formativos (T2B %)', color: '#333333', font: { size: 18 } }, legend: { labels: { color: '#666666', font: { size: 14 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { min: 60, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } } } }
+      });
+      const indNames = ['Significancia en Formación (T2B)', 'Expectativas Cumplidas (T2B)', 'Recomendaría a compañeros (% Sí)'];
+      const ds3Colors = ['#8c7a6b', '#5c9d38', '#e84393']; // Marrón, Oliva, Magenta fuerte
+      const ds3 = indNames.map((h, i) => ({
+        label: h, borderColor: ds3Colors[i], backgroundColor: ds3Colors[i] + '33',
+        data: years.map(y => { const m = DATA.indicadores.find(r => r.Indicador === h && r['Año'] === y); return m ? (m['Resultado (%)'] * 100) : null }),
+        tension: .3, spanGaps: true, pointRadius: 5,
+        borderWidth: i === 2 ? 4 : 2 // Hacemos la línea de Recomendación más gruesa
+      }));
+      charts.trend3 = new Chart(document.getElementById('chart-trend3'), {
+        type: 'line', data: { labels: years, datasets: ds3 },
+        options: { responsive: true, plugins: { datalabels: { display: false }, title: { display: true, text: 'Evolución Indicadores Principales', color: '#333333', font: { size: 18 } }, legend: { labels: { color: '#666666', font: { size: 14 } } } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { min: 40, max: 100, grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 }, callback: v => v + '%' } } } }
+      });
+      const partData = [{ y: 2021, n: 911 }, { y: 2022, n: 2422 }, { y: 2023, n: 1953 }, { y: 2024, n: 3970 }, { y: 2025, n: 4629 }];
+      charts.trend4 = new Chart(document.getElementById('chart-trend4'), {
+        type: 'bar', data: { labels: years, datasets: [{ label: 'Estudiantes encuestados', data: partData.map(d => d.n), backgroundColor: years.map(y => YEAR_COLORS[y]), borderRadius: 8 }] },
+        options: { responsive: true, plugins: { datalabels: { display: true, color: '#333', font: { weight: 'bold', size: 14 }, anchor: 'end', align: 'end', formatter: v => v.toLocaleString('es-CL') }, title: { display: true, text: 'Estudiantes encuestados por año', color: '#333333', font: { size: 18 } }, legend: { display: false } }, scales: { x: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } }, y: { grid: { color: '#eaeaea' }, ticks: { color: '#666666', font: { size: 15 } } } } }
+      });
+    }
+  

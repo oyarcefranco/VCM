@@ -100,11 +100,11 @@ archivos={
 # Configuración de columnas por año
 # IMP: {code: col} — para 2024-2025 es col_start (5 cols one-hot)
 IMP_COLS={
-    2021:{'IMP_01':18,'IMP_02':22,'IMP_04':21,'IMP_05':19,'IMP_06':20,'IMP_07':23},
-    2022:{'IMP_01':18,'IMP_02':22,'IMP_03':20,'IMP_04':24,'IMP_05':19,'IMP_06':21,'IMP_07':23},
-    2023:{'IMP_01':10,'IMP_02':14,'IMP_03':12,'IMP_04':16,'IMP_05':11,'IMP_06':13,'IMP_07':15},
-    2024:{'IMP_01':15,'IMP_02':20,'IMP_03':25,'IMP_04':50,'IMP_07':30,'IMP_08':35,'IMP_09':40,'IMP_10':45},
-    2025:{'IMP_01':16,'IMP_02':21,'IMP_03':26,'IMP_04':56,'IMP_10':31,'IMP_11':36,'IMP_12':41,'IMP_13':46,'IMP_14':51},
+    2021:{'IMP_01':18,'IMP_02':22,'IMP_04':21,'IMP_05':19,'IMP_06':20,'IMP_07':23,'IMP_14':79},
+    2022:{'IMP_01':18,'IMP_02':22,'IMP_03':20,'IMP_04':24,'IMP_05':19,'IMP_06':21,'IMP_07':23,'IMP_14':81},
+    2023:{'IMP_01':10,'IMP_02':14,'IMP_03':12,'IMP_04':16,'IMP_05':11,'IMP_06':13,'IMP_07':15,'IMP_14':42},
+    2024:{'IMP_01':15,'IMP_02':20,'IMP_03':25,'IMP_04':50,'IMP_07':30,'IMP_08':35,'IMP_09':40,'IMP_10':45,'IMP_14':123},
+    2025:{'IMP_01':16,'IMP_02':21,'IMP_03':26,'IMP_04':56,'IMP_10':31,'IMP_11':36,'IMP_13':46,'IMP_14':51},
 }
 
 HAB_COLS={
@@ -133,7 +133,7 @@ BENEF_COL={2021:73,2022:75,2023:36,2024:140,2025:116}
 # Expectativas columns
 EXPECT_COL={2021:88,2022:88,2023:45,2024:151,2025:123}
 # Campo laboral Sí/No
-CAMPO_COL={2021:75,2022:77,2023:38,2024:115}
+CAMPO_COL={2021:75,2022:77,2023:38,2024:115,2025:41}
 # Recomendaría
 RECOM_COL={2021:90,2022:90,2023:47,2024:156,2025:129}
 # VcM
@@ -152,7 +152,7 @@ EXP_COLS={
     2024:{'EXP_04':135},
 }
 
-ALL_IMP_KEYS=['IMP_01','IMP_02','IMP_03','IMP_04','IMP_05','IMP_06','IMP_07','IMP_08','IMP_09','IMP_10','IMP_11','IMP_12','IMP_13','IMP_14']
+ALL_IMP_KEYS=['IMP_01','IMP_02','IMP_03','IMP_04','IMP_05','IMP_06','IMP_07','IMP_08','IMP_09','IMP_10','IMP_11','IMP_13','IMP_14']
 ALL_HAB_KEYS=['HAB_01','HAB_02','HAB_03','HAB_04','HAB_05','HAB_06','HAB_07','HAB_08','HAB_09','HAB_10','HAB_11','HAB_12']
 ALL_EXP_KEYS=['EXP_01','EXP_02','EXP_03','EXP_04']
 VAL_NAMES_2122=['Búsqueda de la verdad','Valor de la caridad y la justicia','Honestidad','Responsabilidad','Cultivo de la reflexión y la racionalidad','Solidaridad, alegría de servir y sentido del deber','Espíritu de superación y progreso personal','Laboriosidad y vocación por el trabajo bien hecho','Fortaleza y perseverancia','Ninguno']
@@ -180,8 +180,18 @@ for year,(fname,sheet,r_preg,r_alt,ds) in archivos.items():
     for k in ALL_IMP_KEYS:
         if k in IMP_COLS.get(year,{}):
             ci=IMP_COLS[year][k]
-            if is_oh: row[k]=extract_onehot(data,raw,r_alt,ci,5,M_IMP)
-            else: row[k]=[parse_text(data.iloc[i,ci],M_IMP) for i in range(n)]
+            if k == 'IMP_14':
+                if year in (2021, 2022):
+                    row[k] = [parse_text(data.iloc[i,ci], M_FORT) for i in range(n)]
+                elif year == 2023:
+                    row[k] = [parse_text(data.iloc[i,ci], M_ACU) for i in range(n)]
+                elif year == 2024:
+                    row[k] = extract_onehot(data, raw, r_alt, ci, 5, M_ACU)
+                else:  # 2025
+                    row[k] = extract_onehot(data, raw, r_alt, ci, 5, M_IMP)
+            else:
+                if is_oh: row[k]=extract_onehot(data,raw,r_alt,ci,5,M_IMP)
+                else: row[k]=[parse_text(data.iloc[i,ci],M_IMP) for i in range(n)]
         else: row[k]=[np.nan]*n
 
     # HABILIDADES
@@ -218,8 +228,14 @@ for year,(fname,sheet,r_preg,r_alt,ds) in archivos.items():
     # CAMPO LABORAL Sí/No
     if year in CAMPO_COL:
         ci=CAMPO_COL[year]
-        if is_oh: row['Campo_Laboral_SiNo']=extract_onehot_sino(data,raw,r_alt,ci)
-        else: row['Campo_Laboral_SiNo']=[parse_text(data.iloc[i,ci],M_SINO) for i in range(n)]
+        if year == 2025:
+            # En 2025 es una escala likert de Importancia (1-5)
+            # >= 3 es Sí (1), < 3 es No (0)
+            raw_imp = extract_onehot(data, raw, r_alt, ci, 5, M_IMP)
+            row['Campo_Laboral_SiNo'] = [1.0 if pd.notna(v) and v >= 3 else (0.0 if pd.notna(v) else np.nan) for v in raw_imp]
+        else:
+            if is_oh: row['Campo_Laboral_SiNo']=extract_onehot_sino(data,raw,r_alt,ci)
+            else: row['Campo_Laboral_SiNo']=[parse_text(data.iloc[i,ci],M_SINO) for i in range(n)]
     else: row['Campo_Laboral_SiNo']=[np.nan]*n
 
     # RECOMENDARÍA
@@ -309,8 +325,7 @@ with pd.ExcelWriter(path,engine='openpyxl') as w:
     df[meta+['Cumplimiento_Expectativas']].to_excel(w,sheet_name='Cumplimiento_Expectativas',index=False)
 
     # G6: Campo laboral
-    sub=df[df['Año'].isin([2021,2022,2023,2024])]
-    sub[meta+['Campo_Laboral_SiNo']].to_excel(w,sheet_name='Campo_Laboral_SiNo',index=False)
+    df[meta+['Campo_Laboral_SiNo']].to_excel(w,sheet_name='Campo_Laboral_SiNo',index=False)
 
     # G7: Recomendaría
     df[meta+['Recomendaria']].to_excel(w,sheet_name='Recomendaria',index=False)
